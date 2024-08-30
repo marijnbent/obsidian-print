@@ -26,7 +26,7 @@ let versions = JSON.parse(readFileSync("versions.json", "utf8"));
 versions[newVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
 
-// Update CHANGELOG.md
+// Update CHANGELOG.md TODO: not working
 let changelog = readFileSync("CHANGELOG.md", "utf8");
 const today = new Date().toISOString().split('T')[0];
 const newEntry = `## ${newVersion} (${today})\n\n- `;

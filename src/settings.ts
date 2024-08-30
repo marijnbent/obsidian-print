@@ -73,5 +73,10 @@ export class PrintSettingTab extends PluginSettingTab {
                     this.plugin.settings.debugMode = value;
                     await this.plugin.saveSettings();
                 }));
+
+        new Setting(containerEl)
+            .setName('Custom CSS')
+            .setDesc('You can add custom print styles by adding a `print.css` snippet. The print window\'s body uses the `obsidian-print` class, so you can prefix your custom print styles accordingly.');
+
     }
 }

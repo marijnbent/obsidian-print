@@ -47,7 +47,11 @@ export class PrintSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        ['h1Size', 'h2Size', 'h3Size', 'h4Size', 'h5Size', 'h6Size'].forEach((heading, index) => {
+
+
+        const headings = ['h1Size', 'h2Size', 'h3Size', 'h4Size', 'h5Size', 'h6Size'] as const;
+
+        headings.forEach((heading, index) => {
             new Setting(containerEl)
                 .setName(`Heading ${index + 1} Size`)
                 .setDesc(`Set the size for <h${index + 1}> elements.`)

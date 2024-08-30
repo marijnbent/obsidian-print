@@ -1,0 +1,24 @@
+/* Styles for the printed note */
+body { 
+    font-family: sans-serif; 
+    margin: 20px; 
+}
+
+.markdown-preview-sizer {
+    min-height: 0 !important;
+    padding: 0 !important;
+}
+
+h1, .inline-title { 
+    font-weight: bold;
+}
+
+.collapse-indicator { 
+    display: none; 
+}
+
+.metadata-container { 
+    display: none; 
+}
+
+/* Note: Font sizes are set dynamically in the printModal.ts file */

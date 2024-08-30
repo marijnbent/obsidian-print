@@ -16,6 +16,10 @@ The **Obsidian Print** plugin adds a print functionality to your Obsidian worksp
 
 You can also add a shortcut to the print action for even quicker access.
 
+## Getting Started
+
+The plugin is submitted to enter the community plugin store. As the backlog is quite long though, the quickest way to install this plugin is to do it manually. Go to the [latest release](https://github.com/marijnbent/obsidian-print/releases/latest) and download the source code. To add this plugin to Obsidian, [watch this video](https://www.youtube.com/watch?v=ffGfVBLDI_0).
+
 ## Settings
 
 - **Font Size**: Adjust the font sizes through the settings panel.
@@ -35,43 +39,6 @@ If you would like to contribute, please get in touch or make a pull request!
 
 ## Customize CSS
 
-To customize the appearance of your printed notes, you can adjust the default CSS styling. Below is the default CSS configuration used by the plugin:
-
-```css
-body { 
-    font-family: sans-serif; 
-    margin: 20px; 
-    font-size: ${this.settings.fontSize};
-}
-h1, .inline-title { 
-    font-size: ${this.settings.h1Size}; 
-    font-weight: bold; 
-}
-h2 { 
-    font-size: ${this.settings.h2Size}; 
-}
-h3 { 
-    font-size: ${this.settings.h3Size}; 
-}
-h4 { 
-    font-size: ${this.settings.h4Size}; 
-}
-h5 { 
-    font-size: ${this.settings.h5Size}; 
-}
-h6 { 
-    font-size: ${this.settings.h6Size}; 
-}
-.collapse-indicator { 
-    display: none; 
-}
-.metadata-container { 
-    display: none; 
-}
-```
-
-You can modify these styles according to your preferences to achieve the desired look for your printed documents.
-
-## Troubleshooting
+To customize the appearance of your printed notes, you can adjust the default CSS styling. See [the default styling](/styles.css), you can modify these styles according to your preferences to achieve the desired look for your printed documents in the plugin settings.
 
 If you encounter any issues or need help with styling, enable the Debug Mode to see how your notes appear when printed and make adjustments as needed.

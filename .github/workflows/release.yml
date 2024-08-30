@@ -33,7 +33,7 @@ jobs:
         id: changelog
         run: |
           # Extract the latest changelog section
-          changelog=$(sed -n '/^## /{h;d;};H;/^## /{x;p;q;}' CHANGELOG.md)
+          changelog=$(sed -n '/^## /{h;d;};H;/^## /{x;s/^## //;p;q;}' CHANGELOG.md)
           
           # Print the raw extracted changelog
           echo "Raw Extracted Changelog: $changelog"

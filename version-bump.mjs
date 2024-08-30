@@ -34,14 +34,3 @@ changelog = changelog.replace("# Changelog\n\n", `# Changelog\n\n${newEntry}\n\n
 writeFileSync("CHANGELOG.md", changelog);
 
 console.log(`Updated to version ${newVersion}`);
-
-// Git commands
-try {
-    execSync('git add package.json manifest.json versions.json CHANGELOG.md');
-    execSync(`git commit -m "Bump version to ${newVersion}"`);
-    execSync(`git tag -a v${newVersion} -m "Release ${newVersion}"`);
-    console.log(`Git commit and tag created for version ${newVersion}`);
-    console.log('Remember to push the changes and tag with: git push && git push --tags');
-} catch (error) {
-    console.error('Failed to create git commit and tag:', error);
-}

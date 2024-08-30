@@ -32,6 +32,9 @@ jobs:
           changelog="${changelog//$'\r'/'%0D'}"
           echo "::set-output name=changelog::$changelog"
 
+      - name: Debug Changelog Output
+        run: echo "${{ steps.changelog.outputs.changelog }}"
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -42,9 +45,3 @@ jobs:
             --title="$tag" \
             --notes="${{ steps.changelog.outputs.changelog }}" \
             main.js manifest.json styles.css
-
-      - name: Upload release assets
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          gh release upload "${GITHUB_REF#refs/tags/}" main.js manifest.json styles.css

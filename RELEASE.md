@@ -1,1 +1,1 @@
-- Added Custom CSS setting to explain the use of the print.css snippet.
+- Prefix plugin styles so they are only active on the print window.

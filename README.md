@@ -2,6 +2,8 @@
 
 The **Obsidian Print** plugin adds a print functionality to your Obsidian workspace. You can activate the print action from the Command Palette or via the printer ribbon icon.
 
+![Export-1725021527864](https://github.com/user-attachments/assets/2388c9ea-cad5-4669-ae6a-e138120d18f2)
+
 > **[!IMPORTANT]**  
 >  Printing is supported only when you are in the reading view. To switch to reading mode, use the icon in the top right corner, run "Toggle Reading Mode" via the Command Palette or use the shortcut (Cmd/Ctrl + E).
 
@@ -17,6 +19,8 @@ The **Obsidian Print** plugin adds a print functionality to your Obsidian worksp
 - **Font Size**: Adjust the font sizes through the settings panel.
 - **Direct Print**: Enable to bypass the print dialog and print directly to the default printer.
 - **Debug Mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
+
+![image](https://github.com/user-attachments/assets/438f07ea-de26-49f2-8673-1c51014ee4db)
 
 ## Roadmap
 

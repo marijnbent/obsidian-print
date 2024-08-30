@@ -1,4 +1,1 @@
-- Converted the code to TypeScript.
-- Updated to use the newer Obsidian API.
-- Removed the Custom CSS setting.
-- The `print.css` snippet will now be loaded automatically, if available.
+- Added Custom CSS setting to explain the use of the print.css snippet.

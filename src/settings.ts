@@ -1,5 +1,5 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
-import PrintPlugin from './main';
+import PrintPlugin from '../main';
 
 export class PrintSettingTab extends PluginSettingTab {
     plugin: PrintPlugin;

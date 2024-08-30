@@ -1,22 +1,22 @@
-body {
+body.obsidian-print {
     font-family: sans-serif;
     margin: 20px;
 }
 
-.markdown-preview-sizer {
+.obsidian-print .markdown-preview-sizer {
     min-height: 0 !important;
     padding: 0 !important;
 }
 
-h1,
-.inline-title {
+.obsidian-print h1,
+.obsidian-print .inline-title {
     font-weight: bold;
 }
 
-.collapse-indicator {
+.obsidian-print .collapse-indicator {
     display: none;
 }
 
-.metadata-container {
+.obsidian-print .metadata-container {
     display: none;
 }

@@ -18,7 +18,16 @@ You can also add a shortcut to the print action for even quicker access.
 
 ## Getting Started
 
-The plugin is submitted to enter the community plugin store. As the backlog is quite long though, the quickest way to install this plugin is to do it manually. Go to the [latest release](https://github.com/marijnbent/obsidian-print/releases/latest) and download the source code. To add this plugin to Obsidian, [watch this video](https://www.youtube.com/watch?v=ffGfVBLDI_0).
+The plugin has been submitted to the community plugin store, but due to a backlog, it might take some time before it becomes available. Meanwhile, you can install the plugin manually by following these steps:
+
+1. Go to the [latest release](https://github.com/marijnbent/obsidian-print/releases/latest) page and download these three files: `manifest.json`, `styles.css`, and `main.js`.
+2. In your Obsidian plugins directory, create a new folder called `obsidian-print`.
+3. Move the downloaded files into the `obsidian-print` folder.
+4. That’s it! Enable the plugin in Obsidian and start printing.
+
+For additional help, you can watch [this video tutorial](https://www.youtube.com/watch?v=ffGfVBLDI_0).
+
+Following these steps will let you use the plugin right away, even before it’s available in the community store.
 
 ## Settings
 

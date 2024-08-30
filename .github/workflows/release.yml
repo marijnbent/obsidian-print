@@ -26,7 +26,7 @@ jobs:
       - name: Get changelog
         id: changelog
         run: |
-          changelog=$(sed -n "/## ${GITHUB_REF#refs/tags/}/,/## /p" CHANGELOG.md | sed '1d;$d')
+          changelog=$(sed -n '/^## /{h;d;};H;/^## /{x;p;q;}' CHANGELOG.md)
           changelog="${changelog//'%'/'%25'}"
           changelog="${changelog//$'\n'/'%0A'}"
           changelog="${changelog//$'\r'/'%0D'}"

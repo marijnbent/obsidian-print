@@ -1,10 +1,10 @@
 {
-  "id": "print",
-  "name": "Print",
-  "version": "0.1.4",
-  "minAppVersion": "1.6.0",
-  "description": "A simple plugin to add a print action.",
-  "author": "Marijn Bent",
-  "authorUrl": "https://marijnbent.nl",
-  "isDesktopOnly": true
+	"id": "print",
+	"name": "Print",
+	"version": "0.2.0",
+	"minAppVersion": "1.6.0",
+	"description": "A simple plugin to add a print action.",
+	"author": "Marijn Bent",
+	"authorUrl": "https://marijnbent.nl",
+	"isDesktopOnly": true
 }

@@ -17,6 +17,21 @@ jobs:
         with:
           node-version: "18.x"
 
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build plugin
+        run: npm run build
+
+      - name: Get changelog
+        id: changelog
+        run: |
+          changelog=$(sed -n "/## ${GITHUB_REF#refs/tags/}/,/## /p" CHANGELOG.md | sed '1d;$d')
+          changelog="${changelog//'%'/'%25'}"
+          changelog="${changelog//$'\n'/'%0A'}"
+          changelog="${changelog//$'\r'/'%0D'}"
+          echo "::set-output name=changelog::$changelog"
+
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -25,5 +40,11 @@ jobs:
 
           gh release create "$tag" \
             --title="$tag" \
-            --draft \
-            main.js manifest.json
+            --notes="${{ steps.changelog.outputs.changelog }}" \
+            main.js manifest.json styles.css
+
+      - name: Upload release assets
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release upload "${GITHUB_REF#refs/tags/}" main.js manifest.json styles.css

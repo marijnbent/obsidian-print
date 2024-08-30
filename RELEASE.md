@@ -1,3 +1,4 @@
-- Converted to TypeScript
-- Making use of newer Obsidian Api
-- Create release scripts
+- Converted the code to TypeScript.
+- Updated to use the newer Obsidian API.
+- Removed the Custom CSS setting.
+- The `print.css` snippet will now be loaded automatically, if available.

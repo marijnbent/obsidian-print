@@ -1,9 +1,9 @@
 {
   "id": "print",
   "name": "Print",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "minAppVersion": "1.6.0",
-  "description": "A simple plugin to add a print action to Obsidian.",
+  "description": "A simple plugin to add a print action.",
   "author": "Marijn Bent",
   "authorUrl": "https://marijnbent.nl",
   "isDesktopOnly": true

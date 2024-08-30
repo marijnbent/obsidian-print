@@ -14,6 +14,8 @@ The **Obsidian Print** plugin adds a print functionality to your Obsidian worksp
 - **Direct Print**: Skip the print modal and send your document directly to the default printer.
 - **Debug Mode**: Open the print window with your notes content to troubleshoot and adjust styling issues.
 
+You can also add a shortcut to the print action for even quicker access.
+
 ## Settings
 
 - **Font Size**: Adjust the font sizes through the settings panel.

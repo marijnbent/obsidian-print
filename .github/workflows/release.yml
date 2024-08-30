@@ -23,32 +23,6 @@ jobs:
       - name: Build plugin
         run: npm run build
 
-      - name: Check CHANGELOG.md Existence
-        run: ls -l CHANGELOG.md
-
-      - name: Debug CHANGELOG.md File Content
-        run: cat CHANGELOG.md
-
-      - name: Extract Changelog
-        id: changelog
-        run: |
-          # Extract the latest changelog section
-          changelog=$(sed -n '/^## /{h;d;};H;/^## /{x;s/^## //;p;q;}' CHANGELOG.md)
-          
-          # Print the raw extracted changelog
-          echo "Raw Extracted Changelog: $changelog"
-          
-          # URL encode special characters
-          changelog="${changelog//'%'/'%25'}"
-          changelog="${changelog//$'\n'/'%0A'}"
-          changelog="${changelog//$'\r'/'%0D'}"
-          
-          # Set the output
-          echo "::set-output name=changelog::$changelog"
-
-      - name: Debug Changelog Output
-        run: echo ${{ steps.changelog.outputs.changelog }}
-
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -57,5 +31,5 @@ jobs:
 
           gh release create "$tag" \
             --title="$tag" \
-            --notes="${{ steps.changelog.outputs.changelog }}" \
+            --notes-file=RELEASE-NOTES.md \
             main.js manifest.json styles.css

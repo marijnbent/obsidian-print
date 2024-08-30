@@ -1,0 +1,3 @@
+- Converted to TypeScript
+- Making use of newer Obsidian Api
+- Create release scripts

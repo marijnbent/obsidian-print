@@ -25,13 +25,4 @@ let versions = JSON.parse(readFileSync("versions.json", "utf8"));
 versions[newVersion] = minAppVersion;
 writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
 
-// Update CHANGELOG.md 
-let changelog = readFileSync("CHANGELOG.md", "utf8");
-const today = new Date().toISOString().split('T')[0];
-const newEntry = `## ${newVersion} (${today})\n\n-`;
-changelog = changelog.replace("# Changelog\n\n", `# Changelog\n\n${newEntry}\n\n`);
-writeFileSync("CHANGELOG.md", changelog);
-
-console.log(changelog)
-
 console.log(`Updated to version ${newVersion}`);

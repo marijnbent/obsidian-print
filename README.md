@@ -39,6 +39,8 @@ If you would like to contribute, please get in touch or make a pull request!
 
 ## Customize CSS
 
-To customize the appearance of your printed notes, you can adjust the default CSS styling. See [the default styling](/styles.css), you can modify these styles according to your preferences to achieve the desired look for your printed documents in the plugin settings.
+In the settings, you can adjust the font size for all headings and text, and optionally hide the title.
 
-If you encounter any issues or need help with styling, enable the Debug Mode to see how your notes appear when printed and make adjustments as needed.
+To further customize the appearance of your printed notes, you can create a `print.css` snippet. The printed document's body contains the `.obsidian-print` class. Be sure to prefix your print-specific CSS with this class so that it only applies to printed content. You can view the default styles [in this file](/styles.css).
+
+If you have trouble with the styling, enable Debug Mode to preview how your notes will look when printed and make any necessary adjustments.

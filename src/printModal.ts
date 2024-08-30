@@ -1,6 +1,7 @@
 import { PrintPluginSettings } from './types';
+import { readFileSync } from 'fs';
 
-export async function openPrintModal(content: string, settings: PrintPluginSettings): Promise<void> {
+export async function openPrintModal(content: string, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {
     return new Promise((resolve) => {
         const { remote } = (window as any).require("electron");
 
@@ -13,6 +14,21 @@ export async function openPrintModal(content: string, settings: PrintPluginSetti
                 contextIsolation: false
             }
         });
+
+        /**
+         * The CSS is loaded from the two paths. Both are optional. 
+         */
+        let pluginStyle; 
+        let userStyle;
+
+        try {
+            pluginStyle = readFileSync(pluginStylePath, 'utf8') ?? ''
+        } catch {}
+
+        try {
+            userStyle = readFileSync(userStylePath, 'utf8') ?? ''
+        } catch {}
+
 
         const htmlContent = `
             <html>
@@ -28,7 +44,8 @@ export async function openPrintModal(content: string, settings: PrintPluginSetti
                         h4 { font-size: ${settings.h4Size}; }
                         h5 { font-size: ${settings.h5Size}; }
                         h6 { font-size: ${settings.h6Size}; }
-                        ${settings.customCSS || ''}
+                        ${pluginStyle ?? ''}
+                        ${userStyle ?? ''}
                     </style>
                 </head>
                 <body class="obsidian-print">${content}</body>

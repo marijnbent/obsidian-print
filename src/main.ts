@@ -2,6 +2,7 @@ import { Plugin, PluginSettingTab, App, MarkdownView, Notice } from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
 import { openPrintModal } from './printModal';
+import { join } from 'path';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
@@ -49,7 +50,19 @@ export default class PrintPlugin extends Plugin {
             titleElement.remove();
         }
 
-        await openPrintModal(printContent.innerHTML, this.settings);
+        /**
+         * Generating the full path to styles.css and the optional print.css snippet.
+         */
+        const vaultPath = (this.app.vault.adapter as any).getBasePath();
+        
+        const pluginPath = this.manifest.dir ?? '';
+        const cssPath = join(pluginPath, 'styles.css');
+        const pluginStylePath = join(vaultPath, cssPath);
+
+        const snippetsPath = join(vaultPath, '.obsidian', 'snippets');
+        const userStylePath = join(snippetsPath, 'print.css');
+
+        await openPrintModal(printContent.innerHTML, this.settings, pluginStylePath, userStylePath);
     }
 
     async saveSettings() {

@@ -73,16 +73,5 @@ export class PrintSettingTab extends PluginSettingTab {
                     this.plugin.settings.debugMode = value;
                     await this.plugin.saveSettings();
                 }));
-
-        new Setting(containerEl)
-            .setName('Custom CSS')
-            .setDesc('Add custom CSS for the printout.')
-            .addTextArea(textarea => textarea
-                .setPlaceholder('Enter your custom CSS here')
-                .setValue(this.plugin.settings.customCSS || '')
-                .onChange(async (value) => {
-                    this.plugin.settings.customCSS = value;
-                    await this.plugin.saveSettings();
-                }));
     }
 }

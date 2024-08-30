@@ -1,4 +1,3 @@
-/* Styles for the printed note */
 body {
     font-family: sans-serif;
     margin: 20px;
@@ -21,5 +20,3 @@ h1,
 .metadata-container {
     display: none;
 }
-
-/* Note: Font sizes are set dynamically in the printModal.ts file */

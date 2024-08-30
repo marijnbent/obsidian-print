@@ -9,7 +9,6 @@ export interface PrintPluginSettings {
     h5Size: string;
     h6Size: string;
     debugMode: boolean;
-    customCSS: string;
 }
 
 export const DEFAULT_SETTINGS: PrintPluginSettings = {
@@ -22,6 +21,5 @@ export const DEFAULT_SETTINGS: PrintPluginSettings = {
     h4Size: '14px',
     h5Size: '14px',
     h6Size: '12px',
-    debugMode: false,
-    customCSS: ''
+    debugMode: false
 };

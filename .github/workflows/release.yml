@@ -17,11 +17,6 @@ jobs:
         with:
           node-version: "18.x"
 
-      - name: Build plugin
-        run: |
-          npm install
-          npm run build
-
       - name: Create release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

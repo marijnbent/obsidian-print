@@ -68,41 +68,29 @@ class PrintPlugin extends Plugin {
         let view = activeLeaf.view;
         let container = view.containerEl;
 
-        const content = container.querySelector('.markdown-reading-view')?.innerHTML;
+        let content = container.querySelector('.markdown-reading-view');
+        let printContent = content.cloneNode(true);
 
-        if (this.settings.debugMode) {
-            console.log(content)
-        }
-
-        if (!content) {
+        if (!printContent) {
             return this.revertState('Failed to retrieve note content.', currentState, currentMode)
         }
 
-        // If printTitle is false, remove the note title from the content
-        const titleElement = container.querySelector('.inline-title');
-        console.log(titleElement);
-        if (!this.settings.printTitle) {
-            if (titleElement) {
-                content = content.replace(titleElement.outerHTML, '');
-            }
-        }
+        let titleElement = printContent.querySelector('.inline-title');
 
         if (!titleElement) {
             return this.revertState('Failed to retrieve note content.', currentState, currentMode)
         }
 
-        const title = titleElement.innerHTML;
-
-        if (this.settings.debugMode) {
-            console.log(title, content);
+        if (!this.settings.printTitle && titleElement) {
+            titleElement.remove();
         }
 
-        await this.openPrintModal(title, content);
+        await this.openPrintModal(printContent.innerHTML);
 
         return this.revertState(null, currentState, currentMode)
     }
 
-    async openPrintModal(title, content) {
+    async openPrintModal(content) {
         const { remote } = window.require("electron");
 
         return new Promise((resolve) => {
@@ -120,7 +108,7 @@ class PrintPlugin extends Plugin {
             printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(`
                 <html>
                     <head>
-                        <title>${title}</title>
+                        <title>Print Note</title>
                         <style>
                             body { 
                                 font-family: sans-serif; 
@@ -193,7 +181,7 @@ class PrintSettingTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        containerEl.createEl('h2', { text: 'Print Plugin Settings' });
+        new Setting(containerEl).setName('Print Plugin').setHeading();
 
         new Setting(containerEl)
             .setName('Print Note Title')
@@ -216,7 +204,6 @@ class PrintSettingTab extends PluginSettingTab {
                 }));
 
 
-        // Font size setting
         new Setting(containerEl)
             .setName('Font Size')
             .setDesc('Set the font size for the printed note.')
@@ -228,7 +215,6 @@ class PrintSettingTab extends PluginSettingTab {
                     await this.plugin.saveSettings();
                 }));
 
-        // Heading size settings
         ['h1Size', 'h2Size', 'h3Size', 'h4Size', 'h5Size', 'h6Size'].forEach((heading, index) => {
             new Setting(containerEl)
                 .setName(`Heading ${index + 1} Size`)

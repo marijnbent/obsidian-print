@@ -30,7 +30,11 @@ writeFileSync("versions.json", JSON.stringify(versions, null, "\t"));
 let changelog = readFileSync("CHANGELOG.md", "utf8");
 const today = new Date().toISOString().split('T')[0];
 const newEntry = `## ${newVersion} (${today})\n\n- `;
-changelog = changelog.replace("# Changelog\n\n", `# Changelog\n\n${newEntry}\n\n`);
-writeFileSync("CHANGELOG.md", changelog);
+
+if (!changelog.startsWith("# Changelog")) {
+    changelog = `# Changelog\n\n${newEntry}\n${changelog}`;
+} else {
+    changelog = changelog.replace("# Changelog\n\n", `# Changelog\n\n${newEntry}\n`);
+}
 
 console.log(`Updated to version ${newVersion}`);

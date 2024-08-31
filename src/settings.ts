@@ -17,7 +17,7 @@ export class PrintSettingTab extends PluginSettingTab {
         new Setting(containerEl).setName('Print Plugin').setHeading();
 
         new Setting(containerEl)
-            .setName('Print Note Title')
+            .setName('Print note title')
             .setDesc('Include the note title in the printout.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.printTitle)
@@ -27,7 +27,7 @@ export class PrintSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Font Size')
+            .setName('Font size')
             .setDesc('Set the font size for the printed note.')
             .addText(text => text
                 .setPlaceholder('14px')
@@ -43,7 +43,7 @@ export class PrintSettingTab extends PluginSettingTab {
 
         headings.forEach((heading, index) => {
             new Setting(containerEl)
-                .setName(`Heading ${index + 1} Size`)
+                .setName(`Heading ${index + 1} size`)
                 .setDesc(`Set the size for <h${index + 1}> elements.`)
                 .addText(text => text
                     .setPlaceholder(`${this.plugin.settings[heading]}`)
@@ -55,7 +55,7 @@ export class PrintSettingTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
-            .setName('Debug Mode')
+            .setName('Debug mode')
             .setDesc('Enable debug mode. This will open the print window for inspection.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.debugMode)

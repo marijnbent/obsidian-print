@@ -1,1 +1,1 @@
-- Autmatically generate preview content if in source mode. No more switching needed!
+- Move internal files.

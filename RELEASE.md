@@ -1,4 +1,2 @@
-- Removed the plugin name from the print command.
-- Use vault#configDir for the Obsidian dir.
-- Added explanation of user of innerHTML.
-- Remove any for explicit Class
+- Use print-js library instead of deprecated Electron Browser Window.
+- Remove the direct print option, as this is not supported in print-js.

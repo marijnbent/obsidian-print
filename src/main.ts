@@ -63,7 +63,7 @@ export default class PrintPlugin extends Plugin {
         const cssPath = join(pluginPath, 'styles.css');
         const pluginStylePath = join(vaultPath, cssPath);
 
-        const snippetsPath = join(vaultPath, '.obsidian', 'snippets');
+        const snippetsPath = join(vaultPath, this.app.vault.configDir, 'snippets');
         const userStylePath = join(snippetsPath, 'print.css');
 
         await openPrintModal(printContent.innerHTML, this.settings, pluginStylePath, userStylePath);

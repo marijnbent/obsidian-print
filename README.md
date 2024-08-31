@@ -45,7 +45,7 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 - **Direct Print**: Enable to bypass the print dialog and print directly to the default printer.
 - **Debug Mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
 
-![image](https://github.com/user-attachments/assets/438f07ea-de26-49f2-8673-1c51014ee4db)
+![image](https://github.com/user-attachments/assets/0c5cd1ac-0a7e-4909-914d-75c0c1e38e88)
 
 ## Roadmap
 

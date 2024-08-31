@@ -1,82 +1,74 @@
 import { PrintPluginSettings } from '../types';
 import { readFileSync } from 'fs';
+import { Notice } from 'obsidian';
+import printJS, { Configuration } from 'print-js';
 
 export async function openPrintModal(content: HTMLElement, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {
     return new Promise((resolve) => {
-        const { remote } = (window as any).require("electron");
-
-        let printWindow = new remote.BrowserWindow({
-            width: 800,
-            height: 600,
-            show: settings.debugMode,
-            webPreferences: {
-                nodeIntegration: true,
-                contextIsolation: false
-            }
-        });
 
         /**
          * The CSS is loaded from the two paths. Both are optional. 
          */
-        let pluginStyle; 
+        let pluginStyle;
         let userStyle;
 
         try {
             pluginStyle = readFileSync(pluginStylePath, 'utf8') ?? ''
-        } catch {}
+        } catch { }
 
         try {
             userStyle = readFileSync(userStylePath, 'utf8') ?? ''
-        } catch {}
+        } catch { }
 
-        /**
-         * We use innerHTML to include the note content in the print window, as we need to encode it
-         * to use the Electron BrowserWindow.loadURL function.
-         */
-        const noteContent = content.innerHTML;
-        const htmlContent = `
-            <html>
-                <head>
-                    <title>Print Note</title>
-                    <style>
-                        body { 
-                            font-size: ${settings.fontSize};
-                        }
-                        h1, .inline-title { font-size: ${settings.h1Size}; }
-                        h2 { font-size: ${settings.h2Size}; }
-                        h3 { font-size: ${settings.h3Size}; }
-                        h4 { font-size: ${settings.h4Size}; }
-                        h5 { font-size: ${settings.h5Size}; }
-                        h6 { font-size: ${settings.h6Size}; }
-                        ${pluginStyle ?? ''}
-                        ${userStyle ?? ''}
-                    </style>
-                </head>
-                <body class="obsidian-print">${noteContent}</body>
-            </html>
+        const cssString = `
+            body { 
+                font-size: ${settings.fontSize};
+            }
+            h1, .inline-title { font-size: ${settings.h1Size}; }
+            h2 { font-size: ${settings.h2Size}; }
+            h3 { font-size: ${settings.h3Size}; }
+            h4 { font-size: ${settings.h4Size}; }
+            h5 { font-size: ${settings.h5Size}; }
+            h6 { font-size: ${settings.h6Size}; }
+            ${pluginStyle ?? ''}
+            ${userStyle ?? ''}
         `;
 
-        printWindow.loadURL(`data:text/html;charset=utf-8,${encodeURIComponent(htmlContent)}`);
+        /**
+         * Create the HTML
+         */
+        const htmlElement = document.createElement('html');
+        const headElement = document.createElement('head');
 
-        printWindow.webContents.on('did-finish-load', () => {
-            if (settings.debugMode) {
-                printWindow.webContents.openDevTools();
-            }
+        const titleElement = document.createElement('title');
+        titleElement.textContent = 'Print Note';
+        headElement.appendChild(titleElement);
+        htmlElement.appendChild(headElement);
 
-            printWindow.webContents.print({
-                silent: settings.directPrint,
-                printBackground: true
-            }, (success: boolean, failureReason: string) => {
-                if (!settings.debugMode) {
-                    printWindow.close();
-                }
+        const bodyElement = document.createElement('body');
+        bodyElement.className = 'obsidian-print';
+        bodyElement.appendChild(content);
 
+        if (settings.debugMode) {
+            console.log(content);
+        }
+
+        htmlElement.appendChild(bodyElement);
+
+        const configuration: Configuration = {
+            printable: htmlElement,
+            type: 'html',
+            documentTitle: 'Obsidian Print',
+            style: cssString,
+            font_size: '', //Needed to prevent default styling
+            onError: (error) => {
                 if (settings.debugMode) {
-                    console.log(success, failureReason);
+                    console.error('Printing error:', error);
                 }
+                new Notice('An error occurred while printing.');
+            },
+        };
 
-                resolve();
-            });
-        });
+        printJS(configuration);
     });
 }

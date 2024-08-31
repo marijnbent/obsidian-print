@@ -14,7 +14,7 @@ export default class PrintPlugin extends Plugin {
         
         this.addCommand({
             id: 'print-note',
-            name: 'Print Current Note',
+            name: 'Current Note',
             callback: () => this.printNote(),
         });
 

@@ -28,7 +28,7 @@ export class PrintSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Direct Print')
-            .setDesc('Print documents directly using the default printer, bypassing the print modal.')
+            .setDesc('Print documents directly using the default printer, bypassing the print dialog.')
             .addToggle(toggle => toggle
                 .setValue(this.plugin.settings.directPrint)
                 .onChange(async (value) => {

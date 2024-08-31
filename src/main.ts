@@ -1,7 +1,7 @@
 import { Plugin, PluginSettingTab, App, MarkdownView, Notice, TFile } from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
-import { openPrintModal } from './printModal';
+import { openPrintModal } from './utils/printModal';
 import { join } from 'path';
 import { generatePreviewContent } from './utils/generatePreviewContent';
 

@@ -1,4 +1,4 @@
-import { PrintPluginSettings } from './types';
+import { PrintPluginSettings } from '../types';
 import { readFileSync } from 'fs';
 
 export async function openPrintModal(content: string, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {

@@ -1,7 +1,7 @@
 import { PrintPluginSettings } from '../types';
 import { readFileSync } from 'fs';
 
-export async function openPrintModal(content: string, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {
+export async function openPrintModal(content: HTMLElement, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {
     return new Promise((resolve) => {
         const { remote } = (window as any).require("electron");
 
@@ -29,7 +29,11 @@ export async function openPrintModal(content: string, settings: PrintPluginSetti
             userStyle = readFileSync(userStylePath, 'utf8') ?? ''
         } catch {}
 
-
+        /**
+         * We use innerHTML to include the note content in the print window, as we need to encode it
+         * to use the Electron BrowserWindow.loadURL function.
+         */
+        const noteContent = content.innerHTML;
         const htmlContent = `
             <html>
                 <head>
@@ -48,7 +52,7 @@ export async function openPrintModal(content: string, settings: PrintPluginSetti
                         ${userStyle ?? ''}
                     </style>
                 </head>
-                <body class="obsidian-print">${content}</body>
+                <body class="obsidian-print">${noteContent}</body>
             </html>
         `;
 

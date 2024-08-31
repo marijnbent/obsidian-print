@@ -66,7 +66,7 @@ export default class PrintPlugin extends Plugin {
         const snippetsPath = join(vaultPath, this.app.vault.configDir, 'snippets');
         const userStylePath = join(snippetsPath, 'print.css');
 
-        await openPrintModal(printContent.innerHTML, this.settings, pluginStylePath, userStylePath);
+        await openPrintModal(printContent, this.settings, pluginStylePath, userStylePath);
     }
 
     async saveSettings() {

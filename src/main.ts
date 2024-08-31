@@ -38,7 +38,6 @@ export default class PrintPlugin extends Plugin {
 
         if (currentMode === 'source') {
             content = await generatePreviewContent(this.app, activeView);
-            console.log(content);
         } else if (currentMode === 'preview') {
             content = activeView.contentEl.querySelector('.markdown-reading-view');
         }

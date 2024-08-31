@@ -1,1 +1,1 @@
-- Prefix plugin styles so they are only active on the print window.
+- Autmatically generate preview content if in source mode. No more switching needed!

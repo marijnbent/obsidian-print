@@ -41,6 +41,7 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 ## Settings
 
 - **Font Size**: Adjust the font sizes through the settings panel.
+- **Include File Name**: Enable to print the title.
 - **Direct Print**: Enable to bypass the print dialog and print directly to the default printer.
 - **Debug Mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
 
@@ -50,7 +51,6 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 
 Here are some upcoming features I would like to implement:
 
-- **Automatically switch to reading mode**: A feature to automatically switch to reading mode before printing. This is currently prototypes, but does not work for new notes. Assistance from the community is welcome!
 - **Display Images**
 
 If you would like to contribute, please get in touch or make a pull request!

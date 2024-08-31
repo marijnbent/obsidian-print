@@ -1,8 +1,9 @@
-import { Plugin, PluginSettingTab, App, MarkdownView, Notice } from 'obsidian';
+import { Plugin, PluginSettingTab, App, MarkdownView, Notice, TFile } from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
 import { openPrintModal } from './printModal';
 import { join } from 'path';
+import { generatePreviewContent } from './utils/generatePreviewContent';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
@@ -32,12 +33,21 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
-        if (activeView.getMode() !== 'preview') {
-            new Notice('Please open the reading view first.');
+        if (activeView.file && !(activeView.file instanceof TFile)) {
+            new Notice('No file for note to print.');
             return;
         }
 
-        const content = activeView.contentEl.querySelector('.markdown-reading-view');
+        let content: HTMLElement | null = null;
+        const currentMode = activeView.getMode();
+
+        if (currentMode === 'source') {
+            content = await generatePreviewContent(this.app, activeView);
+            console.log(content);
+        } else if (currentMode === 'preview') {
+            content = activeView.contentEl.querySelector('.markdown-reading-view');
+        }
+
         if (!content) {
             new Notice('Failed to retrieve note content.');
             return;

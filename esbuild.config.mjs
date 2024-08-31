@@ -11,7 +11,7 @@ if you want to view the source, please visit the github repository of this plugi
 
 const prod = (process.argv[2] === 'production');
 
-esbuild.build({
+const buildOptions = {
 	banner: {
 		js: banner,
 	},
@@ -38,4 +38,20 @@ esbuild.build({
 	sourcemap: prod ? false : 'inline',
 	treeShaking: true,
 	outfile: 'main.js',
-}).catch(() => process.exit(1));
+};
+
+if (prod) {
+	esbuild.build(buildOptions).catch(() => process.exit(1));
+} else {
+	esbuild.build({
+		...buildOptions,
+		watch: {
+			onRebuild(error, result) {
+				if (error) console.error('watch build failed:', error)
+				else console.log('watch build succeeded:', result)
+			},
+		},
+	}).then(result => {
+		console.log("watching...");
+	}).catch(() => process.exit(1));
+}

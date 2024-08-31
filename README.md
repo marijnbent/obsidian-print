@@ -8,7 +8,6 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 
 - **Command Palette Action**: Activate the print action via the Command Palette.
 - **Printer Ribbon Icon**: Activate the print function quickly with the printer icon.
-- **Direct Print**: Skip the print modal and send your document directly to the default printer.
 - **Debug Mode**: Open the print window with your notes content to troubleshoot and adjust styling issues.
 
 You can also add a shortcut to the print action for even quicker access.
@@ -42,7 +41,6 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 
 - **Font Size**: Adjust the font sizes through the settings panel.
 - **Include File Name**: Enable to print the title.
-- **Direct Print**: Enable to bypass the print dialog and print directly to the default printer.
 - **Debug Mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
 
 ![image](https://github.com/user-attachments/assets/0c5cd1ac-0a7e-4909-914d-75c0c1e38e88)

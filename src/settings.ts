@@ -27,16 +27,6 @@ export class PrintSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
-            .setName('Direct Print')
-            .setDesc('Print documents directly using the default printer, bypassing the print dialog.')
-            .addToggle(toggle => toggle
-                .setValue(this.plugin.settings.directPrint)
-                .onChange(async (value) => {
-                    this.plugin.settings.directPrint = value;
-                    await this.plugin.saveSettings();
-                }));
-
-        new Setting(containerEl)
             .setName('Font Size')
             .setDesc('Set the font size for the printed note.')
             .addText(text => text

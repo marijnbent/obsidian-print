@@ -1,6 +1,5 @@
 export interface PrintPluginSettings {
     printTitle: boolean;
-    directPrint: boolean;
     fontSize: string;
     h1Size: string;
     h2Size: string;
@@ -13,7 +12,6 @@ export interface PrintPluginSettings {
 
 export const DEFAULT_SETTINGS: PrintPluginSettings = {
     printTitle: true,
-    directPrint: false,
     fontSize: '14px',
     h1Size: '20px',
     h2Size: '18px',

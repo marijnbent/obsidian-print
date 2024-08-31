@@ -1,4 +1,4 @@
-import { Plugin, PluginSettingTab, App, MarkdownView, Notice, TFile } from 'obsidian';
+import { Plugin, PluginSettingTab, App, MarkdownView, Notice, TFile, FileSystemAdapter } from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
 import { openPrintModal } from './utils/printModal';
@@ -57,7 +57,8 @@ export default class PrintPlugin extends Plugin {
         /**
          * Generating the full path to styles.css and the optional print.css snippet.
          */
-        const vaultPath = (this.app.vault.adapter as any).getBasePath();
+        const adapter = this.app.vault.adapter as FileSystemAdapter;
+        const vaultPath = adapter.getBasePath();
         
         const pluginPath = this.manifest.dir ?? '';
         const cssPath = join(pluginPath, 'styles.css');

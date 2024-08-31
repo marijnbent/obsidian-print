@@ -1,2 +1,1 @@
-- Use print-js library instead of deprecated Electron Browser Window.
-- Remove the direct print option, as this is not supported in print-js.
+- Use printd over print-js

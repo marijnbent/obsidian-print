@@ -1,7 +1,6 @@
 import { PrintPluginSettings } from '../types';
 import { readFileSync } from 'fs';
-import { Notice } from 'obsidian';
-import printJS, { Configuration } from 'print-js';
+import { Printd } from 'printd'
 
 export async function openPrintModal(content: HTMLElement, settings: PrintPluginSettings, pluginStylePath: string, userStylePath: string): Promise<void> {
     return new Promise((resolve) => {
@@ -55,20 +54,7 @@ export async function openPrintModal(content: HTMLElement, settings: PrintPlugin
 
         htmlElement.appendChild(bodyElement);
 
-        const configuration: Configuration = {
-            printable: htmlElement,
-            type: 'html',
-            documentTitle: 'Obsidian Print',
-            style: cssString,
-            font_size: '', //Needed to prevent default styling
-            onError: (error) => {
-                if (settings.debugMode) {
-                    console.error('Printing error:', error);
-                }
-                new Notice('An error occurred while printing.');
-            },
-        };
-
-        printJS(configuration);
+        const d = new Printd()
+        d.print(htmlElement, [cssString])
     });
 }

@@ -7,16 +7,19 @@ export async function generatePreviewContent(app: App, view: MarkdownView): Prom
         const titleEl = tempPreviewEl.createEl('div', { cls: 'inline-title' });
         titleEl.textContent = view.file?.basename || ''
 
-        app.vault.read(view.file!).then(content => {
-            MarkdownRenderer.render(
-                app,
-                content,
-                tempPreviewEl,
-                view.file?.path || '',
-                view
-            ).then(() => {
-                resolve(tempPreviewEl);
-            })
-        });
+        /**
+         * I tried `app.vault.read(view.file!)`, but the content is not always up-to-date.
+         */
+        const content = view.editor.getValue();
+
+        MarkdownRenderer.render(
+            app,
+            content,
+            tempPreviewEl,
+            view.file?.path || '',
+            view
+        ).then(() => {
+            resolve(tempPreviewEl);
+        })
     });
 }

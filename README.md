@@ -4,9 +4,6 @@ The **Obsidian Print** plugin adds a print functionality to your Obsidian worksp
 
 ![Export-1725021591298](https://github.com/user-attachments/assets/9ab00cc7-1fd4-4841-9a3f-92ea366417d8)
 
-> [!IMPORTANT]  
->  Printing is supported only when you are in the reading view. To switch to reading mode, use the icon in the top right corner, run "Toggle Reading Mode" via the Command Palette or use the shortcut (Cmd/Ctrl + E).
-
 ## Features
 
 - **Command Palette Action**: Activate the print action via the Command Palette.

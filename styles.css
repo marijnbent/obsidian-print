@@ -34,4 +34,9 @@
     img {
         max-width: 100%;
     }
+
+    ul.contains-task-list {
+        list-style-type: none;
+        padding-left: 0;
+    }
 }

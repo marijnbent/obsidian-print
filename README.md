@@ -6,10 +6,16 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 
 ## Features
 
-- **Print notes!**: Simply but effective. Activate the print action via the command palette, the printer ribbon or by right-clicking a note.
+- **Print notes**: Simply but effective. Activate the print action via the command palette, the printer ribbon or by right-clicking a note.
 - **Print all notes in a folder**: Right-click on a folder or use the command palette to print all notes in a folder.
 
 You can also add a shortcut to the print action for even quicker access.
+
+| | |
+|:------:|:-------------------------:|
+|![image](https://github.com/user-attachments/assets/8ba2959c-20a2-4cab-8ae7-c2f5f2475217)|![image](https://github.com/user-attachments/assets/ddb54bd0-4b58-410f-9d69-0f6a58b2ddfd)
+
+
 
 ## Getting Started
 
@@ -43,7 +49,7 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 - **Combine folder notes**: Enable to remove page breaks between notes when printing all notes from a folder.
 - **Debug mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
 
-![image](https://github.com/user-attachments/assets/0c5cd1ac-0a7e-4909-914d-75c0c1e38e88)
+![image](https://github.com/user-attachments/assets/2ffed185-cc8f-43d9-8444-7cb9657d61f7)
 
 ## Roadmap
 

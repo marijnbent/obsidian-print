@@ -29,6 +29,9 @@ export async function generatePrintStyles(app: App, manifest: PluginManifest, se
         return '';
     }
 
+    /**
+     * TODO: Only include if the print.css is activated.
+     */
     const snippetsPath = join(vaultPath, app.vault.configDir, 'snippets');
     userStylePath = join(snippetsPath, 'print.css');
 

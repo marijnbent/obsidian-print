@@ -1,1 +1,1 @@
-- Use printd over print-js
+- Use sentence-case for settings.

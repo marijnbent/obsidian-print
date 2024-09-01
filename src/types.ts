@@ -7,6 +7,7 @@ export interface PrintPluginSettings {
     h4Size: string;
     h5Size: string;
     h6Size: string;
+    combineFolderNotes: boolean;
     debugMode: boolean;
 }
 
@@ -19,5 +20,6 @@ export const DEFAULT_SETTINGS: PrintPluginSettings = {
     h4Size: '14px',
     h5Size: '14px',
     h6Size: '12px',
+    combineFolderNotes: false,
     debugMode: false
 };

@@ -1,25 +1,32 @@
-import { MarkdownView, App, MarkdownRenderer, TFile } from 'obsidian';
+import { MarkdownRenderer, TFile, Component, Notice } from 'obsidian';
 
-export async function generatePreviewContent(app: App, view: MarkdownView): Promise<HTMLElement | null> {
-    return new Promise((resolve) => {
-        const tempPreviewEl = createDiv();
+/**
+ * Returns the rendered markdown content of an TFile.
+ * 
+ * @param file 
+ * @param withTitle 
+ * @returns 
+ */
+export async function generatePreviewContent(file: TFile, withTitle: boolean): Promise<HTMLElement> {
+    return new Promise(async (resolve) => {
 
-        const titleEl = tempPreviewEl.createEl('div', { cls: 'inline-title' });
-        titleEl.textContent = view.file?.basename || ''
+        const content = createDiv();
 
-        /**
-         * I tried `app.vault.read(view.file!)`, but the content is not always up-to-date.
-         */
-        const content = view.editor.getValue();
+        if (withTitle) {
+            const titleEl = content.createEl('div', { cls: 'inline-title' });
+            titleEl.textContent = file.basename || ''
+        }
 
-        MarkdownRenderer.render(
-            app,
-            content,
-            tempPreviewEl,
-            view.file?.path || '',
-            view
-        ).then(() => {
-            resolve(tempPreviewEl);
-        })
+        const fileContent = await this.app.vault.read(file);
+        await MarkdownRenderer.render(this.app, fileContent, content, file.path, new Component);
+
+        if (!content) {
+            new Notice('Failed to retrieve note content.');
+            return;
+        }
+
+        content.addClass('obsidian-print-note');
+
+        resolve(content);
     });
 }

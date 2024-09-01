@@ -55,6 +55,16 @@ export class PrintSettingTab extends PluginSettingTab {
         });
 
         new Setting(containerEl)
+            .setName('Combine folder notes')
+            .setDesc('When printing a folder, combine all notes into a single document. If disabled, each note will start on a new page.')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.combineFolderNotes)
+                .onChange(async (value) => {
+                    this.plugin.settings.combineFolderNotes = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName('Debug mode')
             .setDesc('Enable debug mode. This will open the print window for inspection.')
             .addToggle(toggle => toggle

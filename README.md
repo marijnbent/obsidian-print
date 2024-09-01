@@ -1,14 +1,13 @@
 # Obsidian Print
 
-The **Obsidian Print** plugin adds a print functionality to your Obsidian workspace. You can activate the print action from the Command Palette or via the printer ribbon icon.
+The **Obsidian Print** plugin adds print functionality to your Obsidian workspace. You can activate the print action from the command palette, the printer ribbon or by right-clicking a note.
 
 https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 
 ## Features
 
-- **Command Palette Action**: Activate the print action via the Command Palette.
-- **Printer Ribbon Icon**: Activate the print function quickly with the printer icon.
-- **Debug Mode**: Open the print window with your notes content to troubleshoot and adjust styling issues.
+- **Print notes!**: Simply but effective. Activate the print action via the command palette, the printer ribbon or by right-clicking a note.
+- **Print all notes in a folder**: Right-click on a folder or use the command palette to print all notes in a folder.
 
 You can also add a shortcut to the print action for even quicker access.
 
@@ -39,9 +38,10 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 
 ## Settings
 
-- **Font Size**: Adjust the font sizes through the settings panel.
-- **Include File Name**: Enable to print the title.
-- **Debug Mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
+- **Include note title**: Enable to print the title.
+- **Font size**: Adjust the font sizes through the settings panel.
+- **Combine folder notes**: Enable to remove page breaks between notes when printing all notes from a folder.
+- **Debug mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
 
 ![image](https://github.com/user-attachments/assets/0c5cd1ac-0a7e-4909-914d-75c0c1e38e88)
 
@@ -57,6 +57,6 @@ If you would like to contribute, please get in touch or make a pull request!
 
 In the settings, you can adjust the font size for all headings and text, and optionally hide the title.
 
-To further customize the appearance of your printed notes, you can create a `print.css` snippet. The printed document's body contains the `.obsidian-print` class. Be sure to prefix your print-specific CSS with this class so that it only applies to printed content. You can view the default styles [in this file](/styles.css).
+To further customize the appearance of your printed notes, you can create a `print.css` snippet. The printed document's body contains the `obsidian-print` class. Be sure to either add wrap your CSS in `@media print` or prefix your print-specific CSS with `obsidian-print` class so that it only applies to printed content. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
-If you have trouble with the styling, enable Debug Mode to preview how your notes will look when printed and make any necessary adjustments.
+If you have trouble with the styling, enable Debug Mode to log the HTML of the printed notes.

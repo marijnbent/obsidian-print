@@ -1,9 +1,10 @@
-import { Plugin, PluginSettingTab, App, MarkdownView, Notice, TFile, FileSystemAdapter } from 'obsidian';
+import { Plugin, Notice, TFile, TFolder} from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
 import { openPrintModal } from './utils/printModal';
-import { join } from 'path';
 import { generatePreviewContent } from './utils/generatePreviewContent';
+import { generatePrintStyles } from './utils/generatePrintStyles';
+import { getFolderByActiveFile } from './utils/getFolderByActiveFile';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
@@ -11,11 +12,17 @@ export default class PrintPlugin extends Plugin {
     async onload() {
 
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
-        
+
         this.addCommand({
             id: 'print-note',
-            name: 'Current Note',
+            name: 'Current note',
             callback: () => this.printNote(),
+        });
+
+        this.addCommand({
+            id: 'print-folder-notes',
+            name: 'All notes in current folder',
+            callback: () => this.printFolder(),
         });
 
         this.addSettingTab(new PrintSettingTab(this.app, this));
@@ -23,51 +30,73 @@ export default class PrintPlugin extends Plugin {
         this.addRibbonIcon('printer', 'Print Note', (evt: MouseEvent) => {
             this.printNote();
         });
+
+        this.registerEvent(
+            this.app.workspace.on('file-menu', (menu, file) => {
+                if (file instanceof TFile) {
+                    menu.addItem((item) => {
+                        item
+                            .setTitle('Print note')
+                            .setIcon('printer')
+                            .onClick(() => this.printNote(file));
+                    });
+                } else if (file instanceof TFolder) {
+                    menu.addItem((item) => {
+                        item
+                            .setTitle('Print all notes in folder')
+                            .setIcon('printer')
+                            .onClick(() => this.printFolder(file));
+                    });
+                }
+            })
+        );
     }
 
-    async printNote() {
-        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+    async printNote(file?: TFile) {
+        const activeFile = file || this.app.workspace.getActiveFile();
 
-        if (!activeView) {
-            new Notice('No active note to print.');
+        if (!activeFile) {
+            new Notice('No note to print.');
             return;
         }
 
-        let content: HTMLElement | null = null;
-        const currentMode = activeView.getMode();
+        const content = await generatePreviewContent(activeFile, this.settings.printTitle);
+        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
 
-        if (currentMode === 'source') {
-            content = await generatePreviewContent(this.app, activeView);
-        } else if (currentMode === 'preview') {
-            content = activeView.contentEl.querySelector('.markdown-reading-view');
-        }
+        await openPrintModal(content, this.settings, cssString);
+    }
 
-        if (!content) {
-            new Notice('Failed to retrieve note content.');
+    async printFolder(folder?: TFolder) {
+
+        const activeFolder = folder || await getFolderByActiveFile(this.app);
+
+        if (!activeFolder) {
+            new Notice('Could not resolve folder.');
             return;
         }
 
-        const printContent = content.cloneNode(true) as HTMLElement;
-        const titleElement = printContent.querySelector('.inline-title');
+        const files = activeFolder.children.filter((file) => file instanceof TFile && file.extension === 'md') as TFile[];
 
-        if (!this.settings.printTitle && titleElement) {
-            titleElement.remove();
+        if (files.length === 0) {
+            new Notice('No markdown files found in the folder.');
+            return;
         }
 
-        /**
-         * Generating the full path to styles.css and the optional print.css snippet.
-         */
-        const adapter = this.app.vault.adapter as FileSystemAdapter;
-        const vaultPath = adapter.getBasePath();
-        
-        const pluginPath = this.manifest.dir ?? '';
-        const cssPath = join(pluginPath, 'styles.css');
-        const pluginStylePath = join(vaultPath, cssPath);
+        const folderContent = createDiv();
 
-        const snippetsPath = join(vaultPath, this.app.vault.configDir, 'snippets');
-        const userStylePath = join(snippetsPath, 'print.css');
+        for (const file of files) {
+            const content = await generatePreviewContent(file, this.settings.printTitle);
 
-        await openPrintModal(printContent, this.settings, pluginStylePath, userStylePath);
+            if (!this.settings.combineFolderNotes) {
+                content.addClass('obsidian-print-page-break');
+            }
+
+            folderContent.append(content);
+        }
+
+        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
+
+        await openPrintModal(folderContent, this.settings, cssString);
     }
 
     async saveSettings() {

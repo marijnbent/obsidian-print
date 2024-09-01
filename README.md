@@ -14,7 +14,7 @@ You can also add a shortcut to the print action for even quicker access.
 
 ## Getting Started
 
-The plugin has been submitted to the community plugin store, but due to a backlog, it might take some time before it becomes available. Meanwhile, you have two ways to install the plugin: manually or via BRAT.
+The plugin has been submitted to the community plugin store. While it’s under review, you can install the plugin using one of two methods: manually or via BRAT.
 
 ### Option 1: Install via BRAT (Beta Reviewers Auto-update Tool)
 

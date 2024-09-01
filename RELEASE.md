@@ -1,1 +1,1 @@
-- Properly display images
+- Add checklist styling.

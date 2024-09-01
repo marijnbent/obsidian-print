@@ -1,1 +1,1 @@
-- Use sentence-case for settings.
+- Add feature to print all notes in the selected folder, by right-clicking a folder or using the command palette. 

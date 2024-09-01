@@ -51,14 +51,6 @@ For additional help, you can watch [this video tutorial](https://www.youtube.com
 
 ![image](https://github.com/user-attachments/assets/2ffed185-cc8f-43d9-8444-7cb9657d61f7)
 
-## Roadmap
-
-Here are some upcoming features I would like to implement:
-
-- **Display Images**
-
-If you would like to contribute, please get in touch or make a pull request!
-
 ## Customize CSS
 
 In the settings, you can adjust the font size for all headings and text, and optionally hide the title.

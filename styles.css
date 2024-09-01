@@ -30,4 +30,8 @@
     .obsidian-print-page-break {
         page-break-before: always;
     }
+
+    img {
+        max-width: 100%;
+    }
 }

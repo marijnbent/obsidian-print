@@ -1,26 +1,33 @@
-body.obsidian-print {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
-    margin: 20px;
-}
+@media print {
 
-.obsidian-print .markdown-preview-sizer {
-    min-height: 0 !important;
-    padding: 0 !important;
-}
+    body {
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
+        margin: 20px;
+    }
 
-.obsidian-print h1,
-.obsidian-print .inline-title {
-    font-weight: bold;
-}
+    .markdown-preview-sizer {
+        min-height: 0 !important;
+        padding: 0 !important;
+    }
 
-.obsidian-print .collapse-indicator {
-    display: none;
-}
+    h1,
+    .inline-title {
+        font-weight: bold;
+    }
 
-.obsidian-print .metadata-container {
-    display: none;
-}
+    .collapse-indicator {
+        display: none;
+    }
 
-.obsidian-print pre button {
-    display: none
+    .metadata-container {
+        display: none;
+    }
+
+    pre button {
+        display: none
+    }
+
+    .obsidian-print-page-break {
+        page-break-before: always;
+    }
 }

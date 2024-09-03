@@ -1,2 +1,2 @@
-- Add table styling
-- Save active file before printing to ensure the lastest changes are printed.
+- Plugin file is now minified.
+- Removed unnecessary file system functions to retrieve styling.

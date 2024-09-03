@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-print-plugin",
-	"version": "0.3.3",
+	"version": "0.3.4",
 	"description": "An Obsidian plugin for enhanced printing capabilities",
 	"main": "main.js",
 	"scripts": {

@@ -1,4 +1,4 @@
-import { Plugin, Notice, TFile, TFolder} from 'obsidian';
+import { Plugin, Notice, TFile, TFolder, MarkdownView } from 'obsidian';
 import { PrintSettingTab } from './settings';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
 import { openPrintModal } from './utils/printModal';
@@ -53,6 +53,10 @@ export default class PrintPlugin extends Plugin {
     }
 
     async printNote(file?: TFile) {
+        if (!file) {
+            await this.saveActiveFile()
+        }
+
         const activeFile = file || this.app.workspace.getActiveFile();
 
         if (!activeFile) {
@@ -67,6 +71,10 @@ export default class PrintPlugin extends Plugin {
     }
 
     async printFolder(folder?: TFolder) {
+
+        if (!folder) {
+            await this.saveActiveFile()
+        }
 
         const activeFolder = folder || await getFolderByActiveFile(this.app);
 
@@ -97,6 +105,17 @@ export default class PrintPlugin extends Plugin {
         const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
 
         await openPrintModal(folderContent, this.settings, cssString);
+    }
+
+    /**
+     * Save the active file before printing, so we can retrieve the most recent content.
+     */
+    async saveActiveFile() {
+        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
+
+        if (activeView) {
+            await activeView.save();
+        }
     }
 
     async saveSettings() {

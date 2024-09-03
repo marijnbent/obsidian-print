@@ -1,6 +1,4 @@
 import { App, FileSystemAdapter, Notice, PluginManifest } from "obsidian";
-import { join } from 'path';
-import { readFileSync } from 'fs';
 import { PrintPluginSettings } from "src/types";
 
 /**
@@ -14,40 +12,32 @@ import { PrintPluginSettings } from "src/types";
  */
 export async function generatePrintStyles(app: App, manifest: PluginManifest, settings: PrintPluginSettings): Promise<string> {
     const adapter = app.vault.adapter as FileSystemAdapter;
-    const vaultPath = adapter.getBasePath();
 
-    let pluginStylePath = null;
-    let userStylePath = null;
-
-    const pluginPath = manifest.dir;
-
-    if (pluginPath) {
-        const cssPath = join(pluginPath, 'styles.css');
-        pluginStylePath = join(vaultPath, cssPath);
-    } else {
-        new Notice('Could not find the plugin path. No default print styles are be added.');
+    if (!(adapter instanceof FileSystemAdapter)) {
+        new Notice('File system adapter not found.')
         return '';
     }
 
-    /**
-     * TODO: Only include if the print.css is activated.
-     */
-    const snippetsPath = join(vaultPath, app.vault.configDir, 'snippets');
-    userStylePath = join(snippetsPath, 'print.css');
+    let pluginStyle = '';
+    let userStyle = '';
 
-    let pluginStyle;
-    let userStyle;
-
-    try {
-        pluginStyle = readFileSync(pluginStylePath, 'utf8')
-    } catch {
-        new Notice('Default styling could not be located.');
+    if (manifest.dir) {
+        const cssPath = `${manifest.dir}/styles.css`;
+        try {
+            pluginStyle = await adapter.read(cssPath);
+        } catch (error) {
+            new Notice('Default styling could not be located.');
+        }
+    } else {
+        new Notice('Could not find the plugin path. No default print styles will be added.');
     }
 
-    // This style is optional, so no notice is shown if not found.
+    // Read user styles (optional)
+    // TODO: Only include if the print.css is activated.
+    const userStylePath = `${app.vault.configDir}/snippets/print.css`;
     try {
-        userStyle = readFileSync(userStylePath, 'utf8')
-    } catch {}
+        userStyle = await adapter.read(userStylePath);
+    } catch { }
 
     return `
         body { font-size: ${settings.fontSize}; }

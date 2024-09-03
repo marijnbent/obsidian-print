@@ -1,1 +1,2 @@
-- Add checklist styling.
+- Add table styling
+- Save active file before printing to ensure the lastest changes are printed.

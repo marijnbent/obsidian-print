@@ -10,27 +10,24 @@ import { Printd } from 'printd'
  * @returns 
  */
 export async function openPrintModal(content: HTMLElement, settings: PrintPluginSettings, cssString: string): Promise<void> {
-    return new Promise((resolve) => {
+    const htmlElement = document.createElement('html');
+    const headElement = document.createElement('head');
 
-        const htmlElement = document.createElement('html');
-        const headElement = document.createElement('head');
+    const titleElement = document.createElement('title');
+    titleElement.textContent = 'Print Note';
+    headElement.appendChild(titleElement);
+    htmlElement.appendChild(headElement);
 
-        const titleElement = document.createElement('title');
-        titleElement.textContent = 'Print Note';
-        headElement.appendChild(titleElement);
-        htmlElement.appendChild(headElement);
+    const bodyElement = document.createElement('body');
+    bodyElement.className = 'obsidian-print';
+    bodyElement.appendChild(content);
 
-        const bodyElement = document.createElement('body');
-        bodyElement.className = 'obsidian-print';
-        bodyElement.appendChild(content);
+    if (settings.debugMode) {
+        console.log(content);
+    }
 
-        if (settings.debugMode) {
-            console.log(content);
-        }
+    htmlElement.appendChild(bodyElement);
 
-        htmlElement.appendChild(bodyElement);
-
-        const d = new Printd()
-        d.print(htmlElement, [cssString])
-    });
+    const d = new Printd()
+    d.print(htmlElement, [cssString])
 }

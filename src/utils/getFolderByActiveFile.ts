@@ -7,7 +7,6 @@ import { App, TFolder } from 'obsidian';
  * @returns 
  */
 export async function getFolderByActiveFile(app: App): Promise<TFolder|null> {
-    return new Promise((resolve) => {
 
         const activeFile = app.workspace.getActiveFile();
 
@@ -15,11 +14,10 @@ export async function getFolderByActiveFile(app: App): Promise<TFolder|null> {
             const parentFolder = activeFile.parent;
 
             if (parentFolder instanceof TFolder) {
-                resolve(parentFolder)
+                return parentFolder
             }
         }
 
-        resolve(null)
+        return null
 
-    });
 }

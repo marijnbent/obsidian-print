@@ -7,8 +7,7 @@ import { MarkdownRenderer, TFile, Component, Notice } from 'obsidian';
  * @param withTitle 
  * @returns 
  */
-export async function generatePreviewContent(file: TFile, withTitle: boolean): Promise<HTMLElement> {
-    return new Promise(async (resolve) => {
+export async function generatePreviewContent(file: TFile, withTitle: boolean): Promise<HTMLElement|void> {
 
         const content = createDiv();
 
@@ -27,6 +26,5 @@ export async function generatePreviewContent(file: TFile, withTitle: boolean): P
 
         content.addClass('obsidian-print-note');
 
-        resolve(content);
-    });
+        return content;
 }

@@ -67,6 +67,10 @@ export default class PrintPlugin extends Plugin {
         const content = await generatePreviewContent(activeFile, this.settings.printTitle);
         const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
 
+        if (!content) {
+            return;
+        }
+
         await openPrintModal(content, this.settings, cssString);
     }
 
@@ -94,6 +98,10 @@ export default class PrintPlugin extends Plugin {
 
         for (const file of files) {
             const content = await generatePreviewContent(file, this.settings.printTitle);
+
+            if (!content) {
+                continue;
+            }
 
             if (!this.settings.combineFolderNotes) {
                 content.addClass('obsidian-print-page-break');

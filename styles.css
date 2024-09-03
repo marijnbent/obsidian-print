@@ -5,14 +5,12 @@
         margin: 20px;
     }
 
+    /*
+    Obsidian
+    */
     .markdown-preview-sizer {
         min-height: 0 !important;
         padding: 0 !important;
-    }
-
-    h1,
-    .inline-title {
-        font-weight: bold;
     }
 
     .collapse-indicator {
@@ -27,16 +25,60 @@
         display: none
     }
 
+    /*
+    Obsidian Print
+    */
     .obsidian-print-page-break {
         page-break-before: always;
     }
 
+    /*
+    Images
+    */
     img {
         max-width: 100%;
     }
 
+    /*
+    Lists
+    */
     ul.contains-task-list {
         list-style-type: none;
         padding-left: 0;
+    }
+
+    /*
+    Tables
+    */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 1em;
+    }
+
+    th,
+    td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+    }
+
+    tr:nth-child(even) {
+        background-color: #f9f9f9;
+    }
+
+    table,
+    tr,
+    td,
+    th,
+    tbody,
+    thead,
+    tfoot {
+        page-break-inside: avoid;
     }
 }

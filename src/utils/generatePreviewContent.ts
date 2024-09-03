@@ -13,7 +13,7 @@ export async function generatePreviewContent(file: TFile, withTitle: boolean): P
         const content = createDiv();
 
         if (withTitle) {
-            const titleEl = content.createEl('div', { cls: 'inline-title' });
+            const titleEl = content.createEl('h1');
             titleEl.textContent = file.basename || ''
         }
 

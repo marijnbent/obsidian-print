@@ -50,10 +50,8 @@ export async function generatePrintStyles(app: App, manifest: PluginManifest, se
     } catch {}
 
     return `
-        body { 
-            font-size: ${settings.fontSize};
-        }
-        h1, .inline-title { font-size: ${settings.h1Size}; }
+        body { font-size: ${settings.fontSize}; }
+        h1 { font-size: ${settings.h1Size}; }
         h2 { font-size: ${settings.h2Size}; }
         h3 { font-size: ${settings.h3Size}; }
         h4 { font-size: ${settings.h4Size}; }

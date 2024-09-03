@@ -1,2 +1,1 @@
-- Plugin file is now minified.
-- Removed unnecessary file system functions to retrieve styling.
+- Removed unnecessary promises in the code.

@@ -14,8 +14,6 @@ export class PrintSettingTab extends PluginSettingTab {
 
         containerEl.empty();
 
-        new Setting(containerEl).setName('Print').setHeading();
-
         new Setting(containerEl)
             .setName('Print note title')
             .setDesc('Include the note title in the printout.')

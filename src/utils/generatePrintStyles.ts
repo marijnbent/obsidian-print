@@ -11,12 +11,7 @@ import { PrintPluginSettings } from "src/types";
  * @returns 
  */
 export async function generatePrintStyles(app: App, manifest: PluginManifest, settings: PrintPluginSettings): Promise<string> {
-    const adapter = app.vault.adapter as FileSystemAdapter;
-
-    if (!(adapter instanceof FileSystemAdapter)) {
-        new Notice('File system adapter not found.')
-        return '';
-    }
+    const adapter = app.vault.adapter;
 
     let pluginStyle = '';
     let userStyle = '';

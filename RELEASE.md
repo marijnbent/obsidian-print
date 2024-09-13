@@ -1,1 +1,1 @@
-- Removed unnecessary promises in the code.
+- Code review changes

@@ -3,7 +3,7 @@
 	"name": "Print",
 	"version": "0.3.5",
 	"minAppVersion": "1.6.0",
-	"description": "A simple plugin to add a print action.",
+	"description": "Print notes and documents directly from your workspace.",
 	"author": "Marijn Bent",
 	"authorUrl": "https://marijnbent.nl",
 	"isDesktopOnly": true

@@ -27,7 +27,7 @@ export default class PrintPlugin extends Plugin {
 
         this.addSettingTab(new PrintSettingTab(this.app, this));
 
-        this.addRibbonIcon('printer', 'Print Note', (evt: MouseEvent) => {
+        this.addRibbonIcon('printer', 'Print note', (evt: MouseEvent) => {
             this.printNote();
         });
 

@@ -14,7 +14,7 @@ export async function openPrintModal(content: HTMLElement, settings: PrintPlugin
     const headElement = document.createElement('head');
 
     const titleElement = document.createElement('title');
-    titleElement.textContent = 'Print Note';
+    titleElement.textContent = 'Print note';
     headElement.appendChild(titleElement);
     htmlElement.appendChild(headElement);
 

@@ -1,6 +1,6 @@
-# Obsidian Print
+# Print
 
-The **Obsidian Print** plugin adds print functionality to your Obsidian workspace. You can activate the print action from the command palette, the printer ribbon or by right-clicking a note.
+The Print plugin adds print functionality to your Obsidian workspace. You can activate the print action from the command palette, the printer ribbon or by right-clicking a note.
 
 https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 

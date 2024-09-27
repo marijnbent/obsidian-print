@@ -1,1 +1,1 @@
-- Add option to treat horizontal lines as page breaks.♐
+- Open Electron preview in debug mode to see the generated HTML and CSS.

@@ -1,1 +1,1 @@
-- Code review changes
+- Add option to treat horizontal lines as page breaks.♐

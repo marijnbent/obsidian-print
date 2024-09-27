@@ -6,5 +6,6 @@
 	"description": "Print notes and documents directly from your workspace.",
 	"author": "Marijn Bent",
 	"authorUrl": "https://marijnbent.nl",
-	"isDesktopOnly": true
+	"isDesktopOnly": true,
+	"fundingUrl": "https://buymeacoffee.com/marijnbent"
 }

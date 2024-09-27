@@ -63,6 +63,16 @@ export class PrintSettingTab extends PluginSettingTab {
                 }));
 
         new Setting(containerEl)
+            .setName('Treat horizontal lines as page breaks')
+            .setDesc('Enable this option to interpret horizontal lines (---) as page breaks ')
+            .addToggle(toggle => toggle
+                .setValue(this.plugin.settings.hrPageBreaks)
+                .onChange(async (value) => {
+                    this.plugin.settings.hrPageBreaks = value;
+                    await this.plugin.saveSettings();
+                }));
+
+        new Setting(containerEl)
             .setName('Debug mode')
             .setDesc('Enable debug mode. This will open the print window for inspection.')
             .addToggle(toggle => toggle

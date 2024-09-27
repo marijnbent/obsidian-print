@@ -17,6 +17,13 @@ You can also add a shortcut to the print action for even quicker access.
 |:------:|:-------------------------:|
 |![image](https://github.com/user-attachments/assets/8ba2959c-20a2-4cab-8ae7-c2f5f2475217)|![image](https://github.com/user-attachments/assets/ddb54bd0-4b58-410f-9d69-0f6a58b2ddfd)
 
+## Support
+
+If you are enjoying this plugin then please support my work and enthusiasm by buying me a coffee
+on [https://www.buymeacoffee.com/marijnbent](https://www.buymeacoffee.com/marijnbent).
+
+<a href="https://www.buymeacoffee.com/marijnbent"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=marijnbent&button_colour=6495ED&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00"></a>
+
 ## Getting Started
 
 ### Install from the Community Plugin Store
@@ -44,11 +51,3 @@ In the settings, you can adjust the font size for all headings and text, and opt
 To further customize the appearance of your printed notes, you can create a `print.css` snippet. The printed document's body contains the `obsidian-print` class. Be sure to either add wrap your CSS in `@media print` or prefix your print-specific CSS with `obsidian-print` class so that it only applies to printed content. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
 If you have trouble with the styling, enable Debug Mode to log the HTML of the printed notes.
-
-## Support
-
-If you are enjoying this plugin then please support my work and enthusiasm by buying me a coffee
-on [https://www.buymeacoffee.com/marijnbent](https://www.buymeacoffee.com/marijnbent).
-.
-
-<a href="https://www.buymeacoffee.com/marijnbent"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=marijnbent&button_colour=6495ED&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00"></a>

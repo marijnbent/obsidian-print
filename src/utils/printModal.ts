@@ -10,7 +10,8 @@ import { Printd } from 'printd';
  */
 export async function openPrintModal(content: HTMLElement, cssString: string) {
     const styleManager = new PrintStyleManager();
-    const printContent = await styleManager.prepareForPrint(content); 
+    const printContent = await styleManager.prepareForPrint(content);
+ 
     
     // Create proper HTML structure
     const htmlElement = document.createElement('html');

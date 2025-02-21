@@ -179,9 +179,3 @@
     max-width: 100%;
     page-break-inside: avoid;
 }
-
-/* Page breaks */
-.obsidian-print .page-break,
-.obsidian-print .obsidian-print-page-break {
-    page-break-before: always;
-}

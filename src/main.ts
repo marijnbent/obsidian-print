@@ -6,6 +6,7 @@ import { generatePreviewContent } from './utils/generatePreviewContent';
 import { generatePrintStyles } from './utils/generatePrintStyles';
 import { getFolderByActiveFile } from './utils/getFolderByActiveFile';
 import { captureActivePreview } from './utils/capturePreview';
+import { ElectronStylePrinter } from './utils/electronPrint';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
@@ -18,6 +19,16 @@ export default class PrintPlugin extends Plugin {
         if (!this.settings.hasInitializedColors) {
             await initializeThemeColors(this.app, this);
         }
+
+        // Inside your plugin class, add to the onload() method:
+        this.addCommand({
+            id: 'print-electron-style',
+            name: 'Print (Electron Style)',
+            callback: async () => {
+                const printer = new ElectronStylePrinter(this.app, this.manifest, this.settings);
+                await printer.print();
+            }
+        });
 
         this.addCommand({
             id: 'print-preview-capture',

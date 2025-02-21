@@ -6,7 +6,7 @@ export async function captureActivePreview(app: App, printTitle: boolean = false
 
     // Store initial view state
     const wasInEditMode = activeView.getMode() === 'source';
-    
+
     // Switch to preview mode if needed
     if (wasInEditMode) {
         await activeView.setState(
@@ -32,14 +32,14 @@ export async function captureActivePreview(app: App, printTitle: boolean = false
     const container = createDiv();
     container.className = 'markdown-preview-view preview-capture-mode';
     const contentSizer = container.createDiv('markdown-preview-sizer');
-    
+
     // Add title if enabled in settings
     if (printTitle && activeView.file) {
         const titleEl = contentSizer.createEl('h1');
         titleEl.textContent = activeView.file.basename;
         titleEl.addClass('obsidian-print-title');
     }
-    
+
     // Add title if it exists in preview
     const titleElement = previewContent.querySelector('.markdown-preview-sizer > h1:first-child');
     if (titleElement) {
@@ -47,13 +47,13 @@ export async function captureActivePreview(app: App, printTitle: boolean = false
         clonedTitle.addClass('obsidian-print-title');
         contentSizer.appendChild(clonedTitle);
     }
-    
+
     // Calculate scroll steps
     const viewportHeight = previewContent.clientHeight;
     const totalHeight = previewContent.scrollHeight;
     const scrollStep = Math.floor(viewportHeight / 2);
     let currentScroll = 0;
-    
+
     // Keep track of captured content
     const capturedElements = new Set<string>();
 
@@ -63,15 +63,13 @@ export async function captureActivePreview(app: App, printTitle: boolean = false
             left: 0,
             behavior: 'instant'
         });
-        await new Promise(resolve => setTimeout(resolve, 0));
+        await new Promise(resolve => setTimeout(resolve, 30));
 
         const visibleElements = previewContent.querySelectorAll('.markdown-preview-sizer > *');
-        
+
         for (const elem of Array.from(visibleElements)) {
             let elementId: string;
-            if (elem instanceof HTMLImageElement) {
-                elementId = elem.src;
-            } else if (elem.querySelector('img')) {
+            if (elem.querySelector('img')) {
                 elementId = elem.querySelector('img')?.src || elem.textContent?.trim() || '';
             } else {
                 elementId = elem.textContent?.trim() || '';
@@ -85,7 +83,7 @@ export async function captureActivePreview(app: App, printTitle: boolean = false
 
         currentScroll += scrollStep;
     }
-previewContent.scrollTo({
+    previewContent.scrollTo({
         top: 0,
         left: 0,
         behavior: 'instant'

@@ -120,39 +120,58 @@
 .obsidian-print ul,
 .obsidian-print ol {
     padding-left: 2em;
+    margin: 0.5em 0;
+    list-style-position: outside;
 }
 
-.obsidian-print .task-list-item {
-    list-style-type: none;
+/* Premier niveau */
+.obsidian-print ul > li {
+    list-style-type: disc !important;
+    display: list-item !important;
+    margin-left: 0;
+    padding-left: 0;
 }
 
-.obsidian-print .task-list-item-checkbox {
-    margin-right: 0.5em;
-}
-.obsidian-print ul li {
-    list-style: disc !important;
-}
-
-.obsidian-print ul ul li {
-    list-style: circle !important;
+/* Deuxième niveau */
+.obsidian-print ul > li > ul > li {
+    list-style-type: circle !important;
+    display: list-item !important;
+    margin-left: 0;
+    padding-left: 0;
 }
 
-.obsidian-print ul ul ul li {
-    list-style: square !important;
+/* Troisième niveau */
+.obsidian-print ul > li > ul > li > ul > li {
+    list-style-type: square !important;
+    display: list-item !important;
+    margin-left: 0;
+    padding-left: 0;
 }
 
-.obsidian-print .task-list-item {
-    list-style-type: none;
-}
-
-.obsidian-print .task-list-item-checkbox {
-    margin-right: 0.5em;
-}
-
+/* Suppression des styles qui causent la duplication */
 .preview-capture-mode ul {
-    list-style: none !important;
-    margin: 0;
-    padding: 0;
+    list-style-position: outside !important;
+    padding-left: 2em !important;
+    margin: 0.5em 0 !important;
+}
+
+.preview-capture-mode ul li {
+    list-style-position: outside !important;
+    margin-left: 0 !important;
+    padding-left: 0 !important;
+}
+
+.preview-capture-mode ul li::before {
+    display: none !important;
+}
+
+/* Task lists */
+.obsidian-print .task-list-item {
+    list-style-type: none;
+}
+
+.obsidian-print .task-list-item-checkbox {
+    margin-right: 0.5em;
 }
 
 /* Images */

@@ -155,25 +155,24 @@ class PrintPreviewModal extends Modal {
         this.contentEl.addClass('print-preview-modal');
     }
     private async contentToPNG(element: HTMLElement): Promise<string> {
-        const A4_WIDTH = 595;
+        const A4_WIDTH = 795; // Augmenté de 595 à 795 pour plus de largeur de contenu
+        const MARGIN = 20;
+        const TOP_MARGIN = 10;
 
-        // Créer le conteneur temporaire
         const tempContainer = document.createElement('div');
         tempContainer.style.width = `${A4_WIDTH}px`;
         tempContainer.style.position = 'fixed';
         tempContainer.style.left = '-9999px';
         tempContainer.style.backgroundColor = 'white';
+        tempContainer.style.padding = `${TOP_MARGIN}px ${MARGIN}px ${MARGIN}px`;
 
-        // Créer un wrapper pour le contenu avec la classe obsidian-print
         const wrapper = document.createElement('div');
         wrapper.className = 'obsidian-print';
 
-        // Préparer le contenu avec les styles
         const styleManager = new PrintStyleManager();
         const styledContent = await styleManager.prepareForPrint(element);
         wrapper.appendChild(styledContent);
 
-        // Ajouter les styles globaux en premier
         const styleElement = document.createElement('style');
         styleElement.textContent = await generatePrintStyles(
             this.app,
@@ -187,11 +186,11 @@ class PrintPreviewModal extends Modal {
 
         try {
             const canvas = await html2canvas(tempContainer, {
-                width: A4_WIDTH,
-                height: styledContent.scrollHeight,
+                width: A4_WIDTH + (MARGIN * 2),
+                height: styledContent.scrollHeight + MARGIN + TOP_MARGIN,
                 scale: 2,
                 backgroundColor: '#ffffff',
-                windowWidth: A4_WIDTH,
+                windowWidth: A4_WIDTH + (MARGIN * 2),
                 logging: true,
                 useCORS: true,
                 allowTaint: true
@@ -245,11 +244,20 @@ class PrintPreviewModal extends Modal {
     private getPrintCss(): string {
         return `
             @media print {
-                @page { margin: 0; }
-                body { margin: 0; }
+                @page { 
+                    margin-top: 20mm;
+                    margin-bottom: 20mm;
+                }
+                @page :first {
+                    margin-top: 5mm;
+                }
+                body { 
+                    margin: 0;
+                }
                 .markdown-preview-view {
                     height: auto !important;
                     margin: 0 !important;
+                    max-width: none !important; // Empêcher la limitation de largeur d'Obsidian
                 }
                 .obsidian-print-page-break {
                     page-break-after: always;
@@ -259,6 +267,7 @@ class PrintPreviewModal extends Modal {
                     display: block;
                     max-width: 100%;
                     margin: 0;
+                    page-break-inside: avoid;
                 }
                 .contains-task-list {
                     padding-left: 2em !important;

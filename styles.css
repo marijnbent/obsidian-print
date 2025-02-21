@@ -1,3 +1,22 @@
+@media print {
+    .markdown-preview-sizer {
+        min-height: 0 !important;
+        padding: 0 !important;
+    }
+
+    .collapse-indicator {
+        display: none;
+    }
+
+    .metadata-container {
+        display: none;
+    }
+
+    .inline-title {
+        display: none !important;
+    }
+}
+
 /* Ensure print text color: force all non-headings to black */
 .obsidian-print *:not(h1, h2, h3, h4, h5, h6) {
     color: black !important;
@@ -11,7 +30,6 @@
     background-color: white;
 }
 
-/* Headers */
 .obsidian-print h1,
 .obsidian-print h2,
 .obsidian-print h3,
@@ -110,6 +128,31 @@
 
 .obsidian-print .task-list-item-checkbox {
     margin-right: 0.5em;
+}
+.obsidian-print ul li {
+    list-style: disc !important;
+}
+
+.obsidian-print ul ul li {
+    list-style: circle !important;
+}
+
+.obsidian-print ul ul ul li {
+    list-style: square !important;
+}
+
+.obsidian-print .task-list-item {
+    list-style-type: none;
+}
+
+.obsidian-print .task-list-item-checkbox {
+    margin-right: 0.5em;
+}
+
+.preview-capture-mode ul {
+    list-style: none !important;
+    margin: 0;
+    padding: 0;
 }
 
 /* Images */

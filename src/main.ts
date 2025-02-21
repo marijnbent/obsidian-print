@@ -5,18 +5,34 @@ import { openPrintModal } from './utils/printModal';
 import { generatePreviewContent } from './utils/generatePreviewContent';
 import { generatePrintStyles } from './utils/generatePrintStyles';
 import { getFolderByActiveFile } from './utils/getFolderByActiveFile';
+import { captureActivePreview } from './utils/capturePreview';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
 
     async onload() {
-        console.log('Print plugin loaded');
+        // console.log('Print plugin loaded');
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
         // Initialize header colors with current theme if not done before
         if (!this.settings.hasInitializedColors) {
             await initializeThemeColors(this.app, this);
         }
+
+        this.addCommand({
+            id: 'print-preview-capture',
+            name: 'Print current preview',
+            callback: async () => {
+                const previewContent = await captureActivePreview(this.app, this.settings.printTitle);
+                if (!previewContent) {
+                    new Notice('No preview content found to print.');
+                    return;
+                }
+
+                const globalCss = await generatePrintStyles(this.app, this.manifest, this.settings);
+                await openPrintModal(previewContent, globalCss);
+            }
+        });
 
         this.addCommand({
             id: 'print-note',
@@ -69,7 +85,7 @@ export default class PrintPlugin extends Plugin {
                         .setTitle('Print note')
                         .setIcon('printer')
                         .onClick(async () => await this.printNote());
-                })
+                });
                 menu.addItem((item) => {
                     item
                         .setTitle('Print selection')
@@ -100,9 +116,9 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
-        console.log("cssString", cssString);
-        await openPrintModal(content, this.settings, cssString);
+        const globalCss = await generatePrintStyles(this.app, this.manifest, this.settings);
+        // console.log("globalCss", globalCss);
+        await openPrintModal(content, globalCss);
     }
 
     /**
@@ -114,20 +130,20 @@ export default class PrintPlugin extends Plugin {
             new Notice('No active note.');
             return;
         }
-    
+
         const selection = activeView.editor.getSelection();
         if (!selection) {
             new Notice('No text selected.');
             return;
         }
-    
+
         const content = await generatePreviewContent(selection, false, this.app);
         if (!content) {
             return;
         }
-    
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
-        await openPrintModal(content, this.settings, cssString);
+
+        const globalCss = await generatePrintStyles(this.app, this.manifest, this.settings);
+        await openPrintModal(content, globalCss);
     }
 
     /**
@@ -135,7 +151,6 @@ export default class PrintPlugin extends Plugin {
      * @param folder Optional folder to print, defaults to active file's folder
      */
     async printFolder(folder?: TFolder) {
-
         if (!folder) {
             await this.saveActiveFile()
         }
@@ -170,9 +185,9 @@ export default class PrintPlugin extends Plugin {
             folderContent.append(content);
         }
 
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
+        const globalCss = await generatePrintStyles(this.app, this.manifest, this.settings);
 
-        await openPrintModal(folderContent, this.settings, cssString);
+        await openPrintModal(folderContent, globalCss);
     }
 
     /**

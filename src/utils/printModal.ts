@@ -8,9 +8,10 @@ import { Printd } from 'printd';
  * @param settings Plugin settings
  * @param cssString CSS styles to apply
  */
-export async function openPrintModal(content: HTMLElement, settings: PrintPluginSettings, cssString: string) {
-    const styleManager = new PrintStyleManager(settings);
-    const printContent = styleManager.prepareForPrint(content);
+export async function openPrintModal(content: HTMLElement, cssString: string) {
+    const styleManager = new PrintStyleManager();
+    const printContent = await styleManager.prepareForPrint(content);
+ 
     
     // Create proper HTML structure
     const htmlElement = document.createElement('html');
@@ -172,21 +173,28 @@ class PrintPreview {
  * Manages the styling of content for printing
  */
 export class PrintStyleManager {
-    constructor(private settings: PrintPluginSettings) {}
+    constructor() {}  // Suppression du paramètre settings
 
     /**
      * Prepares the content for printing by adding necessary print classes
      * @param content The HTML content to prepare
      * @returns The prepared content
      */
-    prepareForPrint(content: HTMLElement): HTMLElement {
+    async prepareForPrint(content: HTMLElement): Promise<HTMLElement> {
         const printContent = content.cloneNode(true) as HTMLElement;
         printContent.classList.add('obsidian-print');
 
-        const mathElements = printContent.querySelectorAll('.math, .math-block');
-        mathElements.forEach(elem => {
-            elem.classList.add('math-print');
-        });
+        // TODO: Fix Mermaid diagrams not rendering in edit mode print
+        // Attempted solutions that didn't work:
+        // 1. Using window.Mermaid API (init/run methods) to force rendering
+        // 2. Adding delays with setTimeout to wait for rendering
+        // 3. Trying to access Obsidian's internal Mermaid renderer
+        // 
+        // Next steps to investigate:
+        // - Study how preview mode handles Mermaid rendering
+        // - Look into Obsidian's MarkdownPreviewView implementation
+        // - Consider converting edit mode content to preview first
+
         return printContent;
     }
 }

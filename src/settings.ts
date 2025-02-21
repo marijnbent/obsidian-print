@@ -1,6 +1,7 @@
 import { App, PluginSettingTab, Setting } from 'obsidian';
 import PrintPlugin from './main';
-import { getHeadersCSS, getPrintSnippet, isPrintSnippetEnabled } from './utils/generatePrintStyles';
+import { getPrintSnippet, isPrintSnippetEnabled } from './utils/generatePrintStyles';
+import { getHeadersCSS } from './utils/importThemeHeaders';
 
 export class PrintSettingTab extends PluginSettingTab {
     plugin: PrintPlugin;
@@ -9,8 +10,6 @@ export class PrintSettingTab extends PluginSettingTab {
         super(app, plugin);
         this.plugin = plugin;
     }
-
-
 
     display(): void {
         const { containerEl } = this;
@@ -37,8 +36,6 @@ export class PrintSettingTab extends PluginSettingTab {
                     this.plugin.settings.fontSize = value;
                     await this.plugin.saveSettings();
                 }));
-
-
 
         const hSizes = ['h1Size', 'h2Size', 'h3Size', 'h4Size', 'h5Size', 'h6Size'] as const;
 

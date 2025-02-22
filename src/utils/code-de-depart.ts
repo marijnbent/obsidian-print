@@ -1,3 +1,4 @@
+/*
 import { App, MarkdownView, Notice, Modal, MarkdownRenderer, Component, PluginManifest } from 'obsidian';
 import { openPrintModal } from './printModal';
 import html2canvas from 'html2canvas';
@@ -5,7 +6,6 @@ import { generatePrintStyles } from './generatePrintStyles';
 import { PrintPluginSettings } from '../types';
 // TODO: Create and implement PrintStyleManager class
 import { getHeadersCSS } from './importThemeHeaders';
-import { PageManager } from './PageManager';
 
 class PrintStyleManager {
     async prepareForPrint(element: HTMLElement): Promise<HTMLElement> {
@@ -67,38 +67,11 @@ class PrintPreviewModal extends Modal {
         this.createControls();
         this.createPreviewContent();
     }
+
     private addGlobalPrintStyles(globalStyles: string) {
         document.head.insertAdjacentHTML('beforeend', `
             <style id="print-modal-styles">
                 ${globalStyles}
-                
-                .preview-page {
-                    background-color: white;
-                    position: relative;
-                    box-sizing: border-box;
-                    break-inside: avoid;
-                    break-after: page;
-                    border: 1px solid #ddd;
-                    margin: 20px auto;
-                    padding: 20mm;
-                    width: 210mm;
-                    min-height: 297mm;
-                }
-                
-                .print-preview-content {
-                    max-height: 80vh;
-                    overflow-y: auto;
-                    padding: 20px;
-                    background-color: #f5f5f5;
-                }
-    
-                .print-preview-modal {
-                    max-width: 100%;
-                    width: calc(210mm + 40px);
-                    margin: 0 auto;
-                }
-    
-                /* Shared styles for both preview and print */
                 .callout {
                     border: 1px solid rgba(0, 0, 0, 0.2);
                     border-radius: 4px;
@@ -110,7 +83,6 @@ class PrintPreviewModal extends Modal {
                         0 1px 5px 0 rgba(0, 0, 0, 0.1),
                         0 3px 1px -2px rgba(0, 0, 0, 0.2);
                 }
-    
                 .callout-title {
                     padding: 0.5em;
                     display: flex;
@@ -120,44 +92,47 @@ class PrintPreviewModal extends Modal {
                     line-height: 1.3em;
                     border-bottom: 1px solid rgba(0, 0, 0, 0.1);
                 }
-    
                 .callout-content {
                     padding: 0.25em 1em;
                 }
-    
-                .task-list-item {
-                    list-style: none !important;
-                    padding-left: 2em !important;
-                    position: relative !important;
+                .callout-content code {
+                    white-space: nowrap;
+                    display: inline-block;
                 }
-    
-                .task-list-item input[type="checkbox"] {
-                    position: absolute !important;
-                    left: 0 !important;
-                    margin: 0.3em 0 0 0 !important;
-                }
-    
-                .contains-task-list {
-                    padding-left: 0 !important;
-                    list-style: none !important;
-                }
-    
-                img {
-                    max-width: 100%;
-                    height: auto;
-                    display: block;
-                    margin: 1em auto;
-                    page-break-inside: avoid;
-                }
-    
-                @media print {
-                    .preview-page {
-                        margin: 0;
-                        padding: 0;
-                        border: none;
-                        break-after: page;
+                @media screen {
+                    .task-list-item {
+                        list-style: none !important;
+                        padding-left: 2em !important;
+                        position: relative !important;
+                    }
+                    .task-list-item input[type="checkbox"] {
+                        position: absolute !important;
+                        left: 0 !important;
+                        margin: 0.3em 0 0 0 !important;
+                    }
+                    .contains-task-list {
+                        padding-left: 0 !important;
+                        list-style: none !important;
                     }
                 }
+                .callout-content p::before {
+                    display: none;  
+                }
+                .callout-content p::marker {
+                    display: none; 
+                }                
+                .task-list-item {
+                    list-style: none !important;
+                }
+                .task-list-item::before,
+                .task-list-item::marker {
+                    display: none !important;
+                    content: none !important;
+                }
+                .contains-task-list {
+                    list-style: none !important;
+                }
+            }
             </style>
         `);
     }
@@ -236,24 +211,15 @@ class PrintPreviewModal extends Modal {
         contentContainer.style.margin = '0';
         contentContainer.style.padding = '0';
 
-        // Créer la première page
-        let currentPage = await PageManager.createPage(this.app, this.manifest, this.settings);
-        await PageManager.applyStyles(currentPage, this.app); // Correction ici
-        contentContainer.appendChild(currentPage);
+        const pageDataUrl = await this.contentToPNG(element);
+        const img = document.createElement('img');
+        img.src = pageDataUrl;
+        img.style.width = '210mm';  // Largeur A4
+        img.style.display = 'block';
+        img.style.margin = '0';
+        img.style.padding = '0';
 
-        // Parcourir tous les éléments du contenu
-        const elements = Array.from(element.children);
-        for (const el of elements) {
-            const elementClone = el.cloneNode(true) as HTMLElement;
-
-            if (!PageManager.isElementFitsInPage(elementClone, currentPage)) {
-                currentPage = await PageManager.createPage(this.app, this.manifest, this.settings);
-                await PageManager.applyStyles(currentPage, this.app); // Correction ici aussi
-                contentContainer.appendChild(currentPage);
-            }
-
-            currentPage.appendChild(elementClone);
-        }
+        contentContainer.appendChild(img);
 
         return container;
     }
@@ -338,6 +304,7 @@ class PrintPreviewModal extends Modal {
             }
         `;
     }
+
     private updateContent() {
         const container = this.contentEl.querySelector('.print-preview-content');
         if (!container) return;
@@ -448,3 +415,4 @@ export class ElectronStylePrinter {
         return container;
     }
 }
+*/

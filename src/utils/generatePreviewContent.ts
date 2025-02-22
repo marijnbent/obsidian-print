@@ -13,36 +13,31 @@ export async function generatePreviewContent(
     withTitle: boolean,
     app: App
 ): Promise<HTMLElement|void> {
-    const content = createDiv();
-
     try {
+        // Créer le conteneur uniquement si on a du contenu à y mettre
+        const content = createDiv('obsidian-print-note');
+
         // Handle title if requested
         if (withTitle && input instanceof TFile) {
             const titleEl = content.createEl('h1');
             titleEl.textContent = input.basename;
+            titleEl.addClass('obsidian-print-title');
         }
 
-        // Get the markdown content based on input type
-        let markdownContent: string;
-        let sourcePath: string = '';
+        // Get the markdown content
+        const markdownContent = input instanceof TFile 
+            ? await app.vault.cachedRead(input)
+            : input;
 
-        if (input instanceof TFile) {
-            markdownContent = await app.vault.cachedRead(input);
-            sourcePath = input.path;
-        } else {
-            markdownContent = input;
-        }
-
-        // Render the markdown content
+        // Render directly into the container
         await MarkdownRenderer.render(
             app,
             markdownContent,
             content,
-            sourcePath,
+            input instanceof TFile ? input.path : '',
             new Component()
         );
 
-        content.addClass('obsidian-print-note');
         return content;
 
     } catch (error) {

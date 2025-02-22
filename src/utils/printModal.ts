@@ -11,28 +11,14 @@ import { Printd } from 'printd';
 export async function openPrintModal(content: HTMLElement, cssString: string) {
     const styleManager = new PrintStyleManager();
     const printContent = await styleManager.prepareForPrint(content);
- 
     
-    // Create proper HTML structure
-    const htmlElement = document.createElement('html');
-    const headElement = document.createElement('head');
-    const bodyElement = document.createElement('body');
-    
-    // Setup head
-    const styleElement = document.createElement('style');
-    styleElement.textContent = cssString;
-    headElement.appendChild(styleElement);
-    
-    // Setup body
-    bodyElement.className = 'obsidian-print';
-    bodyElement.appendChild(printContent);
-    
-    // Assemble HTML
-    htmlElement.appendChild(headElement);
-    htmlElement.appendChild(bodyElement);
+    // Simplification de la structure
+    const container = document.createElement('div');
+    container.className = 'obsidian-print';
+    container.appendChild(printContent);
     
     const preview = new PrintPreview();
-    preview.createPreview(htmlElement, cssString, {
+    preview.createPreview(container, cssString, {
         width: '90%',
         height: '90%',
         scale: 1
@@ -69,17 +55,18 @@ class PrintPreview {
         const containerStyles = dedent`
             .print-preview-window {
                 position: fixed;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
+                top: 0;
+                left: 0;
+                right: 0;
                 background: white;
-                padding: 20px;
-                border: 1px solid #ccc;
-                box-shadow: 0 0 10px rgba(0,0,0,0.2);
+                padding: 0;
+                border: none;
+                box-shadow: none;
                 z-index: 9999;
-                overflow: auto;
-                width: ${options.width || '80%'};
-                height: ${options.height || '80%'};
+                overflow-x: hidden;
+                overflow-y: auto;
+                width: 100%;
+                height: ${options.height || '100%'};
             }
             .print-preview-controls {
                 position: sticky;
@@ -94,29 +81,24 @@ class PrintPreview {
                 z-index: 1;
             }
             .print-preview-content {
-                margin-top: 20px;
-                background-color: #f0f0f0;
-                padding: 10px;
+                margin: 0;
+                padding: 20px;
+                background-color: white;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
             }
             .print-preview-page {
-                background-color: white;
-                margin: 20px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.3);
-                position: relative;
-                box-sizing: border-box;
+                margin: 0;
+                padding: 0;
                 width: auto;
-                height: auto;
-                overflow: visible;
+                background: white;
             }
             .print-preview-page-content {
-                padding: 20px;
-                box-sizing: border-box;
-                width: 100%;
-                height: auto;
-                overflow: visible;
+                margin: 0;
+                padding: 0;
+                width: auto;
+                background: white;
             }
         `;
 
@@ -181,20 +163,27 @@ export class PrintStyleManager {
      * @returns The prepared content
      */
     async prepareForPrint(content: HTMLElement): Promise<HTMLElement> {
+        // Copier directement le contenu sans créer de conteneur supplémentaire
         const printContent = content.cloneNode(true) as HTMLElement;
+        
+        // Nettoyer les éléments vides récursivement
+        const cleanNode = (node: HTMLElement) => {
+            const children = Array.from(node.children);
+            children.forEach(child => {
+                if (child instanceof HTMLElement) {
+                    if (child.children.length > 0) {
+                        cleanNode(child);
+                    }
+                    // Supprimer si vide et pas une image
+                    if (child.nodeName !== 'IMG' && !child.textContent?.trim()) {
+                        child.remove();
+                    }
+                }
+            });
+        };
+        
+        cleanNode(printContent);
         printContent.classList.add('obsidian-print');
-
-        // TODO: Fix Mermaid diagrams not rendering in edit mode print
-        // Attempted solutions that didn't work:
-        // 1. Using window.Mermaid API (init/run methods) to force rendering
-        // 2. Adding delays with setTimeout to wait for rendering
-        // 3. Trying to access Obsidian's internal Mermaid renderer
-        // 
-        // Next steps to investigate:
-        // - Study how preview mode handles Mermaid rendering
-        // - Look into Obsidian's MarkdownPreviewView implementation
-        // - Consider converting edit mode content to preview first
-
         return printContent;
     }
 }

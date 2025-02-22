@@ -180,24 +180,27 @@ class PrintPreviewModal extends Modal {
         this.contentEl.addClass('print-preview-modal');
     }
     private async contentToPNG(element: HTMLElement): Promise<string> {
-        const A4_WIDTH = 795; // Augmenté de 595 à 795 pour plus de largeur de contenu
-        const MARGIN = 20;
-        const TOP_MARGIN = 10;
-
+        const A4_WIDTH = 795; // Largeur du contenu
+        const A4_HEIGHT = 1122; // Hauteur du contenu pour A4 à 96 DPI (environ)
+    
         const tempContainer = document.createElement('div');
         tempContainer.style.width = `${A4_WIDTH}px`;
+        tempContainer.style.height = `${A4_HEIGHT}px`; // Assurez-vous que la hauteur est définie
         tempContainer.style.position = 'fixed';
         tempContainer.style.left = '-9999px';
         tempContainer.style.backgroundColor = 'white';
-        tempContainer.style.padding = `${TOP_MARGIN}px ${MARGIN}px ${MARGIN}px`;
-
+        tempContainer.style.margin = '0'; // Supprimer les marges
+        tempContainer.style.padding = '0'; // Supprimer le padding
+    
         const wrapper = document.createElement('div');
         wrapper.className = 'obsidian-print';
-
+        wrapper.style.margin = '0'; // Supprimer les marges
+        wrapper.style.padding = '0'; // Supprimer le padding
+    
         const styleManager = new PrintStyleManager();
         const styledContent = await styleManager.prepareForPrint(element);
         wrapper.appendChild(styledContent);
-
+    
         const styleElement = document.createElement('style');
         styleElement.textContent = await generatePrintStyles(
             this.app,
@@ -206,21 +209,22 @@ class PrintPreviewModal extends Modal {
         );
         tempContainer.appendChild(styleElement);
         tempContainer.appendChild(wrapper);
-
+    
         document.body.appendChild(tempContainer);
-
+    
         try {
             const canvas = await html2canvas(tempContainer, {
-                width: A4_WIDTH + (MARGIN * 2),
-                height: styledContent.scrollHeight + MARGIN + TOP_MARGIN,
+                width: A4_WIDTH,
+                height: A4_HEIGHT,
                 scale: 2,
                 backgroundColor: '#ffffff',
-                windowWidth: A4_WIDTH + (MARGIN * 2),
+                windowWidth: A4_WIDTH,
+                windowHeight: A4_HEIGHT,
                 logging: true,
                 useCORS: true,
                 allowTaint: true
             });
-
+    
             return canvas.toDataURL('image/png');
         } finally {
             document.body.removeChild(tempContainer);
@@ -231,30 +235,28 @@ class PrintPreviewModal extends Modal {
         container.addClass('markdown-preview-view');
         container.style.margin = '0';
         container.style.padding = '0';
-
+    
         const contentContainer = container.createDiv('markdown-preview-sizer');
         contentContainer.style.margin = '0';
         contentContainer.style.padding = '0';
-
-        // Créer la première page
-        let currentPage = await PageManager.createPage(this.app, this.manifest, this.settings);
-        await PageManager.applyStyles(currentPage, this.app); // Correction ici
-        contentContainer.appendChild(currentPage);
-
+    
         // Parcourir tous les éléments du contenu
         const elements = Array.from(element.children);
+        let currentPage: HTMLElement | null = null;
+    
         for (const el of elements) {
             const elementClone = el.cloneNode(true) as HTMLElement;
-
-            if (!PageManager.isElementFitsInPage(elementClone, currentPage)) {
+    
+            // Créer une nouvelle page seulement si nécessaire
+            if (!currentPage || !PageManager.isElementFitsInPage(elementClone, currentPage)) {
                 currentPage = await PageManager.createPage(this.app, this.manifest, this.settings);
-                await PageManager.applyStyles(currentPage, this.app); // Correction ici aussi
+                await PageManager.applyStyles(currentPage, this.app);
                 contentContainer.appendChild(currentPage);
             }
-
+    
             currentPage.appendChild(elementClone);
         }
-
+    
         return container;
     }
     private createControls() {

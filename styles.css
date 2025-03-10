@@ -1,84 +1,287 @@
+/* Print-specific styles */
 @media print {
-
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
-        margin: 20px;
-    }
-
-    /*
-    Obsidian
-    */
     .markdown-preview-sizer {
         min-height: 0 !important;
         padding: 0 !important;
     }
+}
 
-    .collapse-indicator {
-        display: none;
+@media screen {
+    .obsidian-print {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
     }
+}
 
-    .metadata-container {
-        display: none;
-    }
+/* Hide UI elements */
+.obsidian-print .collapse-indicator,
+.obsidian-print .clickable-icon,
+.obsidian-print .fold-indicator,
+.obsidian-print .mod-collapse-icon,
+.obsidian-print button,
+.obsidian-print .copy-code-button,
+.obsidian-print .metadata-container {
+    display: none !important;
+}
 
-    pre button {
-        display: none
-    }
+/* Base styles for both preview and print */
+.obsidian-print {
+    font-family: var(--print-font-family, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif);
+    line-height: 1.5;
+    background-color: white;
+}
 
-    /*
-    Obsidian Print
-    */
-    .obsidian-print-page-break {
-        page-break-before: always;
-    }
+/* Force text color for non-headings */
+.obsidian-print *:not(h1, h2, h3, h4, h5, h6) {
+    color: black !important;
+}
 
-    /*
-    Images
-    */
-    img {
-        max-width: 100%;
-    }
+/* Inline title if Print title enabled */
+.obsidian-print .inline-title {
+    font-weight: 900;
+    text-align: center;
+    margin-top: 16px;
+    margin-bottom: 24px;
+    border-bottom: 2px solid #000;
+    padding-bottom: 8px;
+}
 
-    /*
-    Lists
-    */
-    ul.contains-task-list {
-        list-style-type: none;
-        padding-left: 0;
-    }
+/* Headings */
+.obsidian-print h1,
+.obsidian-print h2,
+.obsidian-print h3,
+.obsidian-print h4,
+.obsidian-print h5,
+.obsidian-print h6 {
+    margin-top: 1em;
+    margin-bottom: 0.5em;
+    page-break-after: avoid;
+}
 
-    /*
-    Tables
-    */
-    table {
-        border-collapse: collapse;
-        width: 100%;
-        margin-bottom: 1em;
-    }
+/* Links */
+.obsidian-print a {
+    text-decoration: none;
+}
 
-    th,
-    td {
-        border: 1px solid #ddd;
-        padding: 8px;
-        text-align: left;
-    }
+/* Code blocks */
+.obsidian-print pre,
+.obsidian-print code {
+    background-color: #ffffff !important;
+    border: 1px solid #e1e4e8;
+    border-radius: 3px;
+    padding: 0.2em 0.4em;
+    font-family: var(--print-code-font, "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace);
+    color: #24292e;
+    white-space: pre-wrap !important;
+    word-wrap: break-word !important;
+    overflow-wrap: break-word !important;
+    max-width: 100% !important;
+}
 
-    th {
-        background-color: #f2f2f2;
-        font-weight: bold;
-    }
+/* Add support for code block language display */
+.obsidian-print pre {
+    position: relative;
+    margin-top: 1.5em !important;
+}
 
-    tr:nth-child(even) {
-        background-color: #f9f9f9;
-    }
+.obsidian-print pre[class*="language-"]::before {
+    content: attr(class);
+    content: attr(class);
+    position: absolute;
+    top: 0.5em;
+    right: 0.5em;
+    font-size: 0.8em;
+    color: #666666be;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: #f5f5f5ad;
+    padding: 0.1em 0.5em;
+    border: 1px solid #e1e4e8;
+    border-radius: 3px;
+}
 
-    table,
-    tr,
-    td,
-    th,
-    tbody,
-    thead,
-    tfoot {
-        page-break-inside: avoid;
-    }
+/* Clean up language class name display */
+.obsidian-print pre[class*="language-"]::before {
+    content: attr(class);
+    content: attr(class);
+    text-transform: none;
+}
+
+.obsidian-print pre[class^="language-"]::before {
+    content: attr(class);
+    content: attr(class);
+    text-transform: none;
+}
+
+/* Format specific language displays */
+.obsidian-print pre.language-javascript::before {
+    content: "JavaScript";
+}
+
+.obsidian-print pre.language-js::before {
+    content: "JavaScript";
+}
+
+.obsidian-print pre.language-typescript::before {
+    content: "TypeScript";
+}
+
+.obsidian-print pre.language-ts::before {
+    content: "TypeScript";
+}
+
+.obsidian-print pre.language-python::before {
+    content: "Python";
+}
+
+.obsidian-print pre.language-java::before {
+    content: "Java";
+}
+
+.obsidian-print pre.language-c::before {
+    content: "C";
+}
+
+.obsidian-print pre.language-cpp::before {
+    content: "C++";
+}
+
+.obsidian-print pre.language-csharp::before,
+.obsidian-print pre.language-cs::before {
+    content: "C#";
+}
+
+.obsidian-print pre.language-html::before {
+    content: "HTML";
+}
+
+.obsidian-print pre.language-css::before {
+    content: "CSS";
+}
+
+.obsidian-print pre.language-bash::before,
+.obsidian-print pre.language-sh::before {
+    content: "Shell";
+}
+
+.obsidian-print pre.language-yaml::before,
+.obsidian-print pre.language-yml::before {
+    content: "YAML";
+}
+
+.obsidian-print pre.language-json::before {
+    content: "JSON";
+}
+
+.obsidian-print pre.language-markdown::before,
+.obsidian-print pre.language-md::before {
+    content: "Markdown";
+}
+
+.obsidian-print pre.language-sql::before {
+    content: "SQL";
+}
+
+.obsidian-print pre.language-mermaid::before {
+    content: "Mermaid";
+}
+
+.obsidian-print pre.language-dataview::before {
+    content: "Dataview";
+}
+
+.obsidian-print pre code {
+    border: none;
+    padding: 0;
+}
+
+/* Custom metadata styles */
+.obsidian-print .custom-metadata-container {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+}
+
+.obsidian-print .custom-metadata-line {
+    margin: 5px 0;
+    font-family: var(--print-font-family);
+    color: #666;
+}
+
+/* Callouts */
+.obsidian-print .callout {
+    border-radius: 4px;
+    padding: 0;
+    overflow: hidden;
+    margin: 1em 0;
+    background-color: #ffffff;
+    box-shadow: 0 2px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+.obsidian-print .callout-title {
+    padding: 0.5em;
+    display: flex;
+    gap: 8px;
+    font-size: inherit;
+}
+
+.obsidian-print .callout-content {
+    padding: 0.25em 1em;
+}
+
+/* Tables */
+.obsidian-print table {
+    border-collapse: collapse;
+    width: 100%;
+    margin: 1em 0;
+    page-break-inside: avoid;
+}
+
+.obsidian-print th,
+.obsidian-print td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.obsidian-print th {
+    background-color: #ffffff;
+    font-weight: bold;
+}
+
+/* Lists */
+.obsidian-print ul,
+.obsidian-print ol {
+    padding-left: 2em;
+    margin: 0.5em 0;
+    list-style-position: outside;
+}
+
+.obsidian-print ul>li {
+    list-style-type: disc !important;
+}
+
+.obsidian-print ul>li>ul>li {
+    list-style-type: circle !important;
+}
+
+.obsidian-print ul>li>ul>li>ul>li {
+    list-style-type: square !important;
+}
+
+/* Task lists */
+.obsidian-print .task-list-item {
+    list-style-type: none;
+}
+
+.obsidian-print .task-list-item-checkbox {
+    margin-right: 0.5em;
+}
+
+/* Images */
+.obsidian-print img {
+    max-width: 100%;
+    page-break-inside: avoid;
 }

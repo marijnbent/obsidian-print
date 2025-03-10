@@ -1,40 +1,74 @@
-import { Plugin, Notice, TFile, TFolder, MarkdownView } from 'obsidian';
-import { PrintSettingTab } from './settings';
+import { Plugin, TFile, TFolder, MarkdownView } from 'obsidian';
 import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
-import { openPrintModal } from './utils/printModal';
-import { generatePreviewContent } from './utils/generatePreviewContent';
-import { generatePrintStyles } from './utils/generatePrintStyles';
-import { getFolderByActiveFile } from './utils/getFolderByActiveFile';
+import { printFolder } from './folderPrint';
+import { printContent } from './basicPrint/basicPrint';
+import { advancedPrint } from './advancedPrint/advancedPrint';
+import { PrintModeModal } from './PrintModeModal';
+import { contentToHTML } from './normalCapturePreview';
+import { initializeThemeColors, initializeFontSizes, PrintSettingTab } from './settings';
+import { openPrintModal } from './basicPrint/basicPrintPreview';
+import { generatePrintStyles } from './getStyles/generatePrintStyles';
 
 export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
 
     async onload() {
-        console.log('Print plugin loaded');
         this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 
+        // Initialize header colors and font sizes if not done before
+        if (!this.settings.hasInitializedColors) {
+            await initializeThemeColors(this.app, this);
+        }
+        // Initialize header colors and font sizes if not done before
+        if (!this.settings.hasInitializedSizes) {
+            await initializeFontSizes(this);
+        }
+
+        this.addCommand({
+            id: 'advanced-print',
+            name: 'Current note (Advanced print in browser)',
+            callback: async () => {
+                await advancedPrint(this.app, this.manifest, this.settings);
+            }
+        });
+
+        this.addCommand({
+            id: 'standard-print',
+            name: 'Current note (Standard print in browser)',
+            callback: async () => await this.standardPrint(),
+        });
+
+        // original method using electron
         this.addCommand({
             id: 'print-note',
-            name: 'Current note',
-            callback: async () => await this.printNote(),
+            name: 'Current note (Basic print)',
+            callback: async () => await this.basicPrint(),
         });
 
         this.addCommand({
             id: 'print-selection',
-            name: 'Print selection',
-            callback: async () => await this.printSelection(),
+            name: 'Selection',
+            callback: async () => await this.handlePrint(false, true),
         });
 
         this.addCommand({
             id: 'print-folder-notes',
             name: 'All notes in current folder',
-            callback: async () => await this.printFolder(),
+            callback: async () => await printFolder(this),
         });
 
         this.addSettingTab(new PrintSettingTab(this.app, this));
 
+        // Add debounce to prevent double triggering from ribbon
+        let isProcessing = false;
         this.addRibbonIcon('printer', 'Print note', async () => {
-            await this.printNote();
+            if (isProcessing) return;
+            isProcessing = true;
+            await this.handlePrint();
+            // Reset after a short delay
+            setTimeout(() => {
+                isProcessing = false;
+            }, 500);
         });
 
         this.registerEvent(
@@ -44,14 +78,14 @@ export default class PrintPlugin extends Plugin {
                         item
                             .setTitle('Print note')
                             .setIcon('printer')
-                            .onClick(async () => await this.printNote(file));
+                            .onClick(async () => await this.handlePrint(true, false, file));
                     });
                 } else {
                     menu.addItem((item) => {
                         item
                             .setTitle('Print all notes in folder')
                             .setIcon('printer')
-                            .onClick(async () => await this.printFolder(file as TFolder));
+                            .onClick(async () => await printFolder(this, file as TFolder));
                     });
                 }
             })
@@ -63,99 +97,60 @@ export default class PrintPlugin extends Plugin {
                     item
                         .setTitle('Print note')
                         .setIcon('printer')
-                        .onClick(async () => await this.printNote());
-                })
+                        .onClick(async () => await this.handlePrint());
+                });
                 menu.addItem((item) => {
                     item
                         .setTitle('Print selection')
                         .setIcon('printer')
-                        .onClick(async () => await this.printSelection());
+                        .onClick(async () => await this.handlePrint(false, true));
                 });
             })
         );
     }
 
-    async printNote(file?: TFile) {
-        // if file is the active note, save it too
-        if (!file || file === this.app.workspace.getActiveFile()) {
-            file = await this.saveActiveFile() as TFile
-        }
-
-        if (!file) {
-            new Notice('No note to print.');
-            return;
-        }
-
-        const content = await generatePreviewContent(file, this.settings.printTitle, this.app);
+    /**
+     * Prints the current note or a specified file
+     * @param isSelection Whether to print only the selected text (default: false)
+     * @param file Optional file to print, defaults to active file
+     */
+    async standardPrint(isSelection = false, file?: TFile) {
+        const content = await contentToHTML(this.app, this.settings, isSelection, file);
         if (!content) {
             return;
         }
-
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
-        await openPrintModal(content, this.settings, cssString);
+        await printContent(content, this.app, this.manifest, this.settings);
     }
 
-    async printSelection() {
-        const activeView = this.app.workspace.getActiveViewOfType(MarkdownView);
-        if (!activeView) {
-            new Notice('No active note.');
-            return;
-        }
-    
-        const selection = activeView.editor.getSelection();
-        if (!selection) {
-            new Notice('No text selected.');
-            return;
-        }
-    
-        const content = await generatePreviewContent(selection, false, this.app);
-        if (!content) {
-            return;
-        }
-    
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
-        await openPrintModal(content, this.settings, cssString);
-    }
-
-    async printFolder(folder?: TFolder) {
-
-        if (!folder) {
-            await this.saveActiveFile()
-        }
-
-        const activeFolder = folder || await getFolderByActiveFile(this.app);
-
-        if (!activeFolder) {
-            new Notice('Could not resolve folder.');
-            return;
-        }
-
-        const files = activeFolder.children.filter((file) => file instanceof TFile && file.extension === 'md') as TFile[];
-
-        if (files.length === 0) {
-            new Notice('No markdown files found in the folder.');
-            return;
-        }
-
-        const folderContent = createDiv();
-
-        for (const file of files) {
-            const content = await generatePreviewContent(file, this.settings.printTitle, this.app);
-
-            if (!content) {
-                continue;
+    /**
+     * Handles the print logic (standard/advanced) with modal option
+     * @param useAdvancedPrint Whether to use advanced print mode (default: true)
+     * @param isSelection Whether to print only the selected text (default: false)
+     */
+    public async handlePrint(useAdvancedPrint = true, isSelection = false, file?: TFile) {
+        if (this.settings.useModal) {
+            new PrintModeModal(
+                this.app,
+                this.settings,
+                useAdvancedPrint,
+                async (state) => {
+                    if (useAdvancedPrint && state === 'advanced') {
+                        await advancedPrint(this.app, this.manifest, this.settings, isSelection);
+                    } else if (state === 'standard') {
+                        await this.standardPrint(isSelection, file);
+                    } else {
+                        await this.basicPrint(isSelection, file);
+                    }
+                },
+                async () => await this.saveSettings()
+            ).open();
+        } else {
+            if (this.settings.useBrowserPrint) {
+                await this.standardPrint(isSelection, file);
+            } else {
+                await this.basicPrint(isSelection, file);
             }
-
-            if (!this.settings.combineFolderNotes) {
-                content.addClass('obsidian-print-page-break');
-            }
-
-            folderContent.append(content);
         }
-
-        const cssString = await generatePrintStyles(this.app, this.manifest, this.settings);
-
-        await openPrintModal(folderContent, this.settings, cssString);
     }
 
     /**
@@ -169,6 +164,20 @@ export default class PrintPlugin extends Plugin {
         }
 
         return this.app.workspace.getActiveFile();
+    }
+    /**
+     * Prints the current note or a specified file
+     * @param isSelection Whether to print only the selected text (default: false)
+     * @param file Optional file to print, defaults to active file
+     */
+    async basicPrint(isSelection = false, file?: TFile) {
+        const content = await contentToHTML(this.app, this.settings, isSelection, file);
+        if (!content) {
+            return;
+        }
+
+        const globalCSS = await generatePrintStyles(this.app, this.manifest, this.settings);
+        await openPrintModal(content, this.settings, globalCSS);
     }
 
     async saveSettings() {

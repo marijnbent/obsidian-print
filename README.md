@@ -1,53 +1,61 @@
-# Print
+# Obsidian Print Plugin
 
-The Print plugin adds print functionality to your Obsidian workspace. You can activate the print action from the command palette, the printer ribbon or by right-clicking a note. If you like it or find it useful, please consider give it a [star ![GitHub Repo stars](https://img.shields.io/github/stars/marijnbent/obsidian-print?style=social)](https://github.com/marijnbent/obsidian-print) on Github.
-
-https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
-
-*Screen recording of the plugin in use.*
+Enhanced printing capabilities for Obsidian notes with multiple printing modes.
 
 ## Features
 
-- **Print notes**: Simply but effective. Activate the print action via the command palette, the printer ribbon or by right-clicking a note.
-- **Print all notes in a folder**: Right-click on a folder or use the command palette to print all notes in a folder.
+### Three Printing Modes
 
-You can also add a shortcut to the print action for even quicker access.
+1. **Basic Mode**
+   - Direct printing within Obsidian
+   - Simple rendering of notes
+   - Lightweight and fast
 
-| | |
-|:------:|:-------------------------:|
-|![image](https://github.com/user-attachments/assets/8ba2959c-20a2-4cab-8ae7-c2f5f2475217)|![image](https://github.com/user-attachments/assets/ddb54bd0-4b58-410f-9d69-0f6a58b2ddfd)
+2. **Standard Mode**
+   - Browser-based printing with enhanced options
+   - Access to all standard browser printing capabilities
+   - Same rendering quality as Basic mode
 
-## Support
+3. **Advanced Mode**
+   - Enhanced rendering for complex elements
+   - Full support for Mermaid diagrams, callouts, and icons
+   - MathJax formulas not supported
+   - Best visual fidelity (slightly slower)
 
-If you are enjoying this plugin then please support my work and enthusiasm by buying me a coffee
-on [https://www.buymeacoffee.com/marijnbent](https://www.buymeacoffee.com/marijnbent).
+### Print Options Modal
 
-<a href="https://www.buymeacoffee.com/marijnbent"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=marijnbent&button_colour=6495ED&font_colour=ffffff&font_family=Lato&outline_colour=000000&coffee_colour=FFDD00"></a>
+![Print Modal](assets/modal.png)
 
-## Getting Started
+The print modal provides quick access to common settings:
+- Choose between Basic, Standard, and Advanced printing modes
+- Toggle page breaks at horizontal rules
+- Include or exclude the note title
+- Show or hide metadata
 
-### Install from the Community Plugin Store
+### Preview Functionality
 
-1. Open Obsidian and go to **Settings** > **Community plugins**.
-2. Click on **Browse** and search for **Print**.
-3. Click **Install** to add the plugin to your Obsidian setup.
-4. Once installed, enable the plugin and optionally go to the settings page.
+- Preview your document before printing in all modes
+- Full-window preview in browser modes (visible after canceling the print dialog)
+- Press Ctrl+P in the preview window to reopen the print dialog if needed
 
-If you print often, you probably want to add a shortcode to the print action. Go to **Settings** > **Hotkeys**, search for 'print' and bind your preferred shortcut. 
+### Additional Features
+
+- Print selection from notes
+- Print all notes in a folder
+- Customizable header sizes and colors
+- Metadata display in all printing modes
+
+## Usage
+
+- Use the ribbon icon or command palette to print the current note
+- Right-click on a file or folder to access printing options
+- Right-click in the editor to print the current note or selected text
 
 ## Settings
 
-- **Include note title**: Enable to print the title.
-- **Font size**: Adjust the font sizes through the settings panel.
-- **Combine folder notes**: Enable to remove page breaks between notes when printing all notes from a folder.
-- **Debug mode**: Use this to preview and fix styling issues by viewing your notes content in the print window.
-
-![image](https://github.com/user-attachments/assets/2ffed185-cc8f-43d9-8444-7cb9657d61f7)
-
-## Customize CSS
-
-In the settings, you can adjust the font size for all headings and text, and optionally hide the title.
-
-To further customize the appearance of your printed notes, you can create a `print.css` snippet. The printed document's body contains the `obsidian-print` class. Be sure to either add wrap your CSS in `@media print` or prefix your print-specific CSS with `obsidian-print` class so that it only applies to printed content. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
-
-If you have trouble with the styling, enable Debug Mode to log the HTML of the printed notes.
+- Adjust font sizes for all elements including headers
+- Customize header colors to match your preferences
+- Use the "get theme colors" button to automatically import colors from your current theme (light mode colors)
+- Enable/disable page breaks at horizontal rules
+- Toggle metadata display
+- Create custom CSS for advanced styling (use ".obsidian-print" prefix for all selectors)

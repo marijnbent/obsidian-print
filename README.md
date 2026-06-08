@@ -1,3 +1,35 @@
+
+<div align="right">
+  <details>
+    <summary >🌐 Language</summary>
+    <div>
+      <div align="center">
+        <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=en">English</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=zh-CN">简体中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=zh-TW">繁體中文</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=ja">日本語</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=ko">한국어</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=hi">हिन्दी</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=th">ไทย</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=fr">Français</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=de">Deutsch</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=es">Español</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=it">Italiano</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=ru">Русский</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=pt">Português</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=nl">Nederlands</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=pl">Polski</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=ar">العربية</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=fa">فارسی</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=tr">Türkçe</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=vi">Tiếng Việt</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=id">Bahasa Indonesia</a>
+        | <a href="https://openaitx.github.io/view.html?user=marijnbent&project=obsidian-print&lang=as">অসমীয়া</
+      </div>
+    </div>
+  </details>
+</div>
+
 # Print
 
 The Print plugin adds printing tools to your Obsidian workspace. You can print the current note, a text selection, or all notes in a folder from the command palette, the printer ribbon, or the context menu. If you like it or find it useful, please consider giving it a [star ![GitHub Repo stars](https://img.shields.io/github/stars/marijnbent/obsidian-print?style=social)](https://github.com/marijnbent/obsidian-print) on GitHub.

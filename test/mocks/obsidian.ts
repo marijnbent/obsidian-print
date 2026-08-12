@@ -27,10 +27,12 @@ export class Plugin {
 export class Notice {
     message: string;
 
-    constructor(message: string) {
+    constructor(message: string, _timeout?: number) {
         this.message = message;
         getMockNoticeStore().push(message);
     }
+
+    hide(): void {}
 }
 
 export class Modal {

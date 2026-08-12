@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.7 - 2026-08-12
+
+- Generated printable PDFs on iOS so the share sheet offers Print.
+
 ## 0.5.6 - 2026-08-12
 
 - Changed iOS printing to use the native share sheet.

@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 - **Print the current note**: Trigger printing from the command palette, the printer ribbon, or by right-clicking a note.
 - **Print a selection**: Print only the selected text from the active editor.
 - **Print all notes in a folder**: Right-click on a folder or use the command palette to print all markdown notes in that folder.
-- **Print on mobile**: Open the iOS share sheet and select Print when available, or open a standalone print document in the default browser on Android.
+- **Print on mobile**: Generate an A4 PDF on iOS and select Print in the native share sheet, or open a standalone print document in the default browser on Android.
 
 You can also add a shortcut to the print action for even quicker access.
 
@@ -61,4 +61,4 @@ If you have trouble with the styling, enable Debug Mode to open an inspection wi
 
 ## Mobile printing
 
-On iOS, the plugin prepares the document and shows an **Open print options** button. Tap it to open the native share sheet, then select **Print** if iOS offers that action. You can also save the printable HTML file in the vault. Android does not let JavaScript start its native print dialog, so the plugin creates `obsidian-print-output.html` in the vault root and opens it in the default browser. Use the browser menu to print or save the document. The plugin reuses this generated file for later prints and never replaces an existing file that it did not create.
+On iOS, the plugin generates an A4 PDF and then shows an **Open print options** button. Tap it to open the native share sheet, then select **Print**. You can also save the PDF in the vault. PDF pages use images to preserve Obsidian styling and characters, so their text is not selectable. The PDF generator does not replace an existing vault file. Android does not let JavaScript start its native print dialog, so the plugin creates `obsidian-print-output.html` in the vault root and opens it in the default browser. Use the browser menu to print or save the document. The Android generator reuses its file for later prints and never replaces an existing file that it did not create.

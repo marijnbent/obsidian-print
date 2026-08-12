@@ -1,6 +1,20 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { App } from 'obsidian';
+
+const mocks = vi.hoisted(() => ({
+    createIosPdfDocument: vi.fn()
+}));
+
+vi.mock('../src/utils/iosPdfDocument', () => ({
+    createIosPdfDocument: mocks.createIosPdfDocument
+}));
+
 import { openIosPrintDocument } from '../src/utils/iosPrintDocument';
+
+const PDF_BYTES = [
+    0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x37,
+    0x0a, 0x25, 0x25, 0x45, 0x4f, 0x46
+];
 
 type ShareNavigator = Navigator & {
     share: (data?: ShareData) => Promise<void>;
@@ -12,7 +26,7 @@ function createApp(): App {
         vault: {
             readBinary: vi.fn(),
             getAbstractFileByPath: vi.fn(() => null),
-            create: vi.fn(async (path: string) => ({ path }))
+            createBinary: vi.fn(async (path: string) => ({ path }))
         },
         metadataCache: {
             getFirstLinkpathDest: vi.fn()
@@ -45,13 +59,17 @@ function getShareButton(): HTMLButtonElement {
     return button;
 }
 
-function readFile(file: File): Promise<string> {
+function readFile(file: File): Promise<ArrayBuffer> {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.addEventListener('load', () => resolve(String(reader.result)));
+        reader.addEventListener('load', () => resolve(reader.result as ArrayBuffer));
         reader.addEventListener('error', () => reject(reader.error));
-        reader.readAsText(file);
+        reader.readAsArrayBuffer(file);
     });
+}
+
+function createPdfData(): ArrayBuffer {
+    return new Uint8Array(PDF_BYTES).buffer;
 }
 
 function getMockNotices(): string[] {
@@ -71,6 +89,7 @@ describe('openIosPrintDocument', () => {
         vi.clearAllMocks();
         document.body.replaceChildren();
         getMockNotices().length = 0;
+        mocks.createIosPdfDocument.mockResolvedValue(createPdfData());
         delete (navigator as Partial<ShareNavigator>).share;
         delete (navigator as Partial<ShareNavigator>).canShare;
     });
@@ -81,7 +100,7 @@ describe('openIosPrintDocument', () => {
         delete (navigator as Partial<ShareNavigator>).canShare;
     });
 
-    it('shares only one portable HTML file directly from a fresh tap', async () => {
+    it('shares only one prepared PDF directly from a fresh tap', async () => {
         let insideClick = false;
         const share = vi.fn((_data?: ShareData) => {
             expect(insideClick).toBe(true);
@@ -103,6 +122,12 @@ describe('openIosPrintDocument', () => {
 
         expect(share).not.toHaveBeenCalled();
         expect(canShare).toHaveBeenCalledOnce();
+        expect(mocks.createIosPdfDocument).toHaveBeenCalledWith(
+            expect.stringContaining('Quarterly report')
+        );
+        expect(mocks.createIosPdfDocument).toHaveBeenCalledWith(
+            expect.stringContaining('body { color: black; }')
+        );
 
         insideClick = true;
         getShareButton().click();
@@ -115,14 +140,11 @@ describe('openIosPrintDocument', () => {
 
         const file = shareData?.files?.[0];
         expect(file).toBeInstanceOf(File);
-        expect(file?.name).toBe('Report- Q3.html');
-        expect(file?.type).toBe('text/html');
+        expect(file?.name).toBe('Report- Q3.pdf');
+        expect(file?.type).toBe('application/pdf');
 
-        const html = await readFile(file as File);
-        expect(html).toContain('<title>Report: Q3</title>');
-        expect(html).toContain('body { color: black; }');
-        expect(html).toContain('Quarterly report');
-        expect(html).toContain('invoice');
+        const fileData = new Uint8Array(await readFile(file as File));
+        expect(Array.from(fileData)).toEqual(PDF_BYTES);
     });
 
     it('keeps the modal ready for another tap after the share sheet is cancelled', async () => {
@@ -140,11 +162,11 @@ describe('openIosPrintDocument', () => {
         shareButton.click();
         await vi.waitFor(() => expect(shareButton.disabled).toBe(false));
 
-        expect(getMockNotices()).toEqual([]);
+        expect(getMockNotices()).not.toContain('Could not open the iOS print options. Try again.');
         expect(document.body.contains(shareButton)).toBe(true);
     });
 
-    it('offers a safe vault file when iOS cannot share the HTML file', async () => {
+    it('offers a safe vault file when iOS cannot share the PDF', async () => {
         const share = vi.fn(() => Promise.resolve());
         setShareApi(share, () => false);
         const app = createApp();
@@ -158,22 +180,52 @@ describe('openIosPrintDocument', () => {
 
         expect(share).not.toHaveBeenCalled();
         expect(document.body.textContent).toContain(
-            'This Obsidian version cannot share printable files on iOS.'
+            'This Obsidian version cannot share PDF files on iOS.'
         );
         expect(() => getShareButton()).toThrow();
 
         const saveButton = Array.from(document.querySelectorAll('button'))
-            .find((candidate) => candidate.textContent === 'Save printable file');
+            .find((candidate) => candidate.textContent === 'Save PDF');
         expect(saveButton).toBeInstanceOf(HTMLButtonElement);
         (saveButton as HTMLButtonElement).click();
 
         await vi.waitFor(() => {
-            expect(app.vault.create).toHaveBeenCalledWith(
-                'obsidian-print-ios-output.html',
-                expect.stringContaining('<title>Unsupported print</title>')
+            expect(app.vault.createBinary).toHaveBeenCalledWith(
+                'obsidian-print-ios-output.pdf',
+                expect.any(ArrayBuffer)
             );
             expect(getMockNotices()).toContain(
-                'Saved the printable document as "obsidian-print-ios-output.html".'
+                'Saved the printable PDF as "obsidian-print-ios-output.pdf".'
+            );
+        });
+
+        const savedData = (app.vault.createBinary as ReturnType<typeof vi.fn>).mock.calls[0]?.[1];
+        expect(Array.from(new Uint8Array(savedData))).toEqual(PDF_BYTES);
+    });
+
+    it('does not replace an existing PDF when saving the fallback', async () => {
+        setShareApi(vi.fn(() => Promise.resolve()), () => false);
+        const app = createApp();
+        (app.vault.getAbstractFileByPath as ReturnType<typeof vi.fn>)
+            .mockImplementation((path: string) => (
+                path === 'obsidian-print-ios-output.pdf' ? { path } : null
+            ));
+
+        await openIosPrintDocument(
+            app,
+            'Safe fallback',
+            document.createElement('div'),
+            ''
+        );
+
+        const saveButton = Array.from(document.querySelectorAll('button'))
+            .find((candidate) => candidate.textContent === 'Save PDF') as HTMLButtonElement;
+        saveButton.click();
+
+        await vi.waitFor(() => {
+            expect(app.vault.createBinary).toHaveBeenCalledWith(
+                'obsidian-print-ios-output-2.pdf',
+                expect.any(ArrayBuffer)
             );
         });
     });
@@ -198,5 +250,25 @@ describe('openIosPrintDocument', () => {
         expect(consoleError).toHaveBeenCalledWith('Could not open the iOS print options:', error);
         expect(getMockNotices()).toContain('Could not open the iOS print options. Try again.');
         expect(document.body.contains(shareButton)).toBe(true);
+    });
+
+    it('reports a PDF generation failure without opening the share modal', async () => {
+        const error = new Error('Renderer failed');
+        const consoleError = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        mocks.createIosPdfDocument.mockRejectedValue(error);
+        const share = vi.fn(() => Promise.resolve());
+        setShareApi(share);
+
+        await openIosPrintDocument(
+            createApp(),
+            'Failed PDF',
+            document.createElement('div'),
+            ''
+        );
+
+        expect(consoleError).toHaveBeenCalledWith('Could not create the iOS print PDF:', error);
+        expect(getMockNotices()).toContain('Could not create the printable PDF.');
+        expect(share).not.toHaveBeenCalled();
+        expect(document.querySelector('button')).toBeNull();
     });
 });

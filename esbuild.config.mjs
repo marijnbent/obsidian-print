@@ -17,6 +17,9 @@ const buildOptions = {
 	},
 	entryPoints: ['src/main.ts'],
 	bundle: true,
+	alias: {
+		'html2canvas': 'html2canvas-pro'
+	},
 	external: [
 		'obsidian',
 		'@codemirror/autocomplete',

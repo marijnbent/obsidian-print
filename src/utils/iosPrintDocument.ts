@@ -3,11 +3,12 @@ import {
     createPortablePrintDocument,
     showPortableImageWarning
 } from './portablePrintDocument';
+import { createIosPdfDocument } from './iosPdfDocument';
 
-const FALLBACK_FILE_NAME = 'obsidian-print-ios-output.html';
+const FALLBACK_FILE_NAME = 'obsidian-print-ios-output.pdf';
 const MAX_FALLBACK_FILE_CANDIDATES = 100;
 
-/** Prepare an HTML file, then share it from a fresh tap required by iOS. */
+/** Prepare a PDF, then share it from a fresh tap required by iOS. */
 export async function openIosPrintDocument(
     app: App,
     title: string,
@@ -16,39 +17,52 @@ export async function openIosPrintDocument(
     bodyClasses: string[] = [],
     includeAppClasses = true
 ): Promise<void> {
-    const portableDocument = await createPortablePrintDocument(
-        app,
-        title,
-        content,
-        cssText,
-        bodyClasses,
-        includeAppClasses
-    );
-    const file = new File(
-        [portableDocument.html],
-        createPrintFileName(title),
-        { type: 'text/html' }
-    );
+    const preparingNotice = new Notice('Preparing PDF…', 0);
+    let failedImageCount = 0;
+    let pdfData: ArrayBuffer;
 
-    showPortableImageWarning(portableDocument.failedImageCount);
+    try {
+        const portableDocument = await createPortablePrintDocument(
+            app,
+            title,
+            content,
+            cssText,
+            bodyClasses,
+            includeAppClasses
+        );
+        failedImageCount = portableDocument.failedImageCount;
+        pdfData = await createIosPdfDocument(portableDocument.html);
+    } catch (error) {
+        console.error('Could not create the iOS print PDF:', error);
+        new Notice('Could not create the printable PDF.');
+        return;
+    } finally {
+        preparingNotice.hide();
+    }
+
+    const file = new File([pdfData], createPrintFileName(title), {
+        type: 'application/pdf'
+    });
+
+    showPortableImageWarning(failedImageCount);
 
     new IosPrintModal(
         app,
         file,
-        portableDocument.html,
+        pdfData,
         canShareFile(file)
     ).open();
 }
 
 class IosPrintModal extends Modal {
     private readonly file: File;
-    private readonly html: string;
+    private readonly pdfData: ArrayBuffer;
     private readonly canShare: boolean;
 
-    constructor(app: App, file: File, html: string, canShare: boolean) {
+    constructor(app: App, file: File, pdfData: ArrayBuffer, canShare: boolean) {
         super(app);
         this.file = file;
-        this.html = html;
+        this.pdfData = pdfData;
         this.canShare = canShare;
     }
 
@@ -57,7 +71,7 @@ class IosPrintModal extends Modal {
         this.contentEl.createEl('p', {
             text: this.canShare
                 ? 'Open the iOS share sheet, then select Print.'
-                : 'This Obsidian version cannot share printable files on iOS. You can save the file in your vault instead.'
+                : 'This Obsidian version cannot share PDF files on iOS. You can save the PDF in your vault instead.'
         });
 
         if (this.canShare) {
@@ -87,17 +101,17 @@ class IosPrintModal extends Modal {
         }
 
         const saveButton = this.contentEl.createEl('button', {
-            text: 'Save printable file'
+            text: 'Save PDF'
         });
         saveButton.addEventListener('click', () => {
             saveButton.disabled = true;
-            void saveFallbackFile(this.app, this.html).then((path) => {
-                new Notice(`Saved the printable document as "${path}".`);
+            void saveFallbackFile(this.app, this.pdfData).then((path) => {
+                new Notice(`Saved the printable PDF as "${path}".`);
                 this.close();
             }).catch((error: unknown) => {
                 saveButton.disabled = false;
-                console.error('Could not save the iOS print document:', error);
-                new Notice('Could not save the printable document.');
+                console.error('Could not save the iOS print PDF:', error);
+                new Notice('Could not save the printable PDF.');
             });
         });
     }
@@ -124,14 +138,14 @@ function handleShareError(error: unknown): void {
     new Notice('Could not open the iOS print options. Try again.');
 }
 
-async function saveFallbackFile(app: App, html: string): Promise<string> {
+async function saveFallbackFile(app: App, pdfData: ArrayBuffer): Promise<string> {
     for (let index = 1; index <= MAX_FALLBACK_FILE_CANDIDATES; index++) {
         const path = getFallbackPath(index);
         if (app.vault.getAbstractFileByPath(path)) {
             continue;
         }
 
-        const file = await app.vault.create(path, html);
+        const file = await app.vault.createBinary(path, pdfData);
         return file.path;
     }
 
@@ -143,7 +157,7 @@ function getFallbackPath(index: number): string {
         return FALLBACK_FILE_NAME;
     }
 
-    return `obsidian-print-ios-output-${index}.html`;
+    return `obsidian-print-ios-output-${index}.pdf`;
 }
 
 function isAbortError(error: unknown): boolean {
@@ -160,5 +174,5 @@ function createPrintFileName(title: string): string {
         .replace(/[. ]+$/, '')
         .slice(0, 100);
 
-    return `${safeTitle || 'Obsidian print'}.html`;
+    return `${safeTitle || 'Obsidian print'}.pdf`;
 }

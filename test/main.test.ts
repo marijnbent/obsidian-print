@@ -105,6 +105,8 @@ describe('PrintPlugin cssclasses behavior', () => {
         Platform.isMobile = false;
         Platform.isDesktopApp = true;
         Platform.isMobileApp = false;
+        Platform.isIosApp = false;
+        Platform.isAndroidApp = false;
         mocks.generatePrintStyles.mockResolvedValue('body { color: black; }');
     });
 
@@ -124,6 +126,7 @@ describe('PrintPlugin cssclasses behavior', () => {
         const folder = createFolder('Invoices');
         const file = createFile('Invoices/note.md', 'note', folder);
         const content = document.createElement('div');
+        content.className = 'obsidian-print-note';
 
         app.metadataCache.getFileCache.mockReturnValue({
             frontmatter: {
@@ -142,7 +145,9 @@ describe('PrintPlugin cssclasses behavior', () => {
 
         expect(content.classList.contains('invoice')).toBe(true);
         expect(content.classList.contains('compact-print')).toBe(true);
+        expect(content.getAttribute('data-obsidian-print-source-path')).toBe('Invoices/note.md');
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'note',
             content,
             plugin.settings,
@@ -177,6 +182,7 @@ describe('PrintPlugin cssclasses behavior', () => {
         expect(content.classList.contains('invoice')).toBe(true);
         expect(content.classList.contains('compact-print')).toBe(true);
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'note snippet',
             content,
             plugin.settings,
@@ -226,6 +232,7 @@ describe('PrintPlugin cssclasses behavior', () => {
         expect(firstContent.classList.contains('invoice')).toBe(true);
         expect(secondContent.classList.contains('compact-print')).toBe(true);
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'Invoices',
             expect.any(HTMLDivElement),
             plugin.settings,
@@ -297,13 +304,14 @@ describe('PrintPlugin cssclasses behavior', () => {
 
         expect(mocks.generatePreviewContent).not.toHaveBeenCalled();
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'books',
             expect.any(HTMLDivElement),
             plugin.settings,
             'body { color: black; }'
         );
 
-        const [, renderedContent] = mocks.openPrintModal.mock.calls[0];
+        const [, , renderedContent] = mocks.openPrintModal.mock.calls[0];
         expect((renderedContent as HTMLElement).textContent).toContain('books');
         expect((renderedContent as HTMLElement).textContent).toContain('Book list');
     });
@@ -337,13 +345,14 @@ describe('PrintPlugin cssclasses behavior', () => {
 
         expect(mocks.generatePreviewContent).not.toHaveBeenCalled();
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'diagram',
             expect.any(HTMLDivElement),
             plugin.settings,
             'body { color: black; }'
         );
 
-        const [, renderedContent] = mocks.openPrintModal.mock.calls[0];
+        const [, , renderedContent] = mocks.openPrintModal.mock.calls[0];
         expect((renderedContent as HTMLElement).textContent).toContain('diagram');
         expect((renderedContent as HTMLElement).querySelector('img')?.getAttribute('src')).toBe('app://local/Assets/diagram.png');
     });
@@ -409,6 +418,7 @@ describe('PrintPlugin cssclasses behavior', () => {
             false
         );
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'daily',
             content,
             plugin.settings,
@@ -450,6 +460,7 @@ describe('PrintPlugin cssclasses behavior', () => {
             false
         );
         expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
             'daily',
             content,
             plugin.settings,

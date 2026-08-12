@@ -22,6 +22,57 @@
         padding: 0 !important;
     }
 
+    .obsidian-print-view,
+    .obsidian-print-view .view-content,
+    .obsidian-print-view .markdown-reading-view,
+    .obsidian-print-view .markdown-preview-view,
+    .obsidian-print-view .markdown-preview-sizer,
+    .obsidian-print-view .markdown-rendered,
+    .obsidian-print-view .bases-view,
+    .obsidian-print-view .base-view,
+    .obsidian-print-view [class*="bases-"],
+    .obsidian-print-view [class*="base-"] {
+        height: auto !important;
+        max-height: none !important;
+        min-height: 0 !important;
+        overflow: visible !important;
+        contain: none !important;
+        content-visibility: visible !important;
+    }
+
+    .obsidian-print-view [style*="transform"] {
+        transform: none !important;
+    }
+
+    .obsidian-print-base-table {
+        width: 100%;
+        border-collapse: collapse;
+        table-layout: auto;
+        break-inside: auto;
+        page-break-inside: auto;
+    }
+
+    .obsidian-print-base-table th,
+    .obsidian-print-base-table td {
+        border: 1px solid var(--background-modifier-border, #ddd);
+        padding: 6px 8px;
+        text-align: left;
+        vertical-align: top;
+        overflow-wrap: anywhere;
+    }
+
+    .obsidian-print-base-table thead th {
+        background: var(--background-secondary, #f2f2f2);
+        color: var(--text-normal, #111827);
+        font-weight: 600;
+    }
+
+    .obsidian-print-base-group-row th {
+        background: var(--background-primary-alt, #f8f8f8);
+        color: var(--text-muted, #4b5563);
+        font-weight: 600;
+    }
+
     .collapse-indicator,
     .metadata-container,
     pre button {

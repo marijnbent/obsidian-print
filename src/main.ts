@@ -204,6 +204,8 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
+        this.setPrintSourcePath(content, activeView.file);
+
         return {
             title: activeView.file?.basename
                 ? `${activeView.file.basename} snippet`
@@ -224,6 +226,8 @@ export default class PrintPlugin extends Plugin {
         if (!content) {
             return;
         }
+
+        this.setPrintSourcePath(content, file);
 
         return {
             content,
@@ -258,6 +262,7 @@ export default class PrintPlugin extends Plugin {
 
         if (printableContent.bodyClasses) {
             await openPrintModal(
+                this.app,
                 title,
                 printableContent.content,
                 this.settings,
@@ -267,7 +272,7 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
-        await openPrintModal(title, printableContent.content, this.settings, cssString);
+        await openPrintModal(this.app, title, printableContent.content, this.settings, cssString);
     }
 
     private applyNotePrintClasses(content: HTMLElement, file?: TFile | null): string[] {
@@ -278,6 +283,18 @@ export default class PrintPlugin extends Plugin {
         }
 
         return noteCssClasses;
+    }
+
+    private setPrintSourcePath(content: HTMLElement, file?: TFile | null): void {
+        if (!file) {
+            return;
+        }
+
+        const noteContent = content.matches('.obsidian-print-note')
+            ? content
+            : content.querySelector<HTMLElement>('.obsidian-print-note');
+
+        noteContent?.setAttribute('data-obsidian-print-source-path', file.path);
     }
 
     private getNotePrintClasses(file?: TFile | null): string[] {
@@ -296,9 +313,15 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
-        return generateViewContent(activeView, {
+        const content = generateViewContent(activeView, {
             title: this.settings.printTitle ? file.basename : undefined
         });
+
+        if (content) {
+            this.setPrintSourcePath(content, file);
+        }
+
+        return content;
     }
 
     private getActiveFileView(): ActiveFileViewLike | null {

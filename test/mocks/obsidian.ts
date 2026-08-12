@@ -208,8 +208,27 @@ export const Platform = {
     isDesktop: true,
     isMobile: false,
     isDesktopApp: true,
-    isMobileApp: false
+    isMobileApp: false,
+    isIosApp: false,
+    isAndroidApp: false,
+    isPhone: false,
+    isTablet: false,
+    isMacOS: true,
+    isWin: false,
+    isLinux: false,
+    isSafari: false
 };
+
+export function arrayBufferToBase64(buffer: ArrayBuffer): string {
+    const bytes = new Uint8Array(buffer);
+    let binary = '';
+
+    bytes.forEach((byte) => {
+        binary += String.fromCharCode(byte);
+    });
+
+    return btoa(binary);
+}
 
 function getMockNoticeStore(): string[] {
     const globalWithNoticeStore = globalThis as typeof globalThis & {

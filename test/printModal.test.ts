@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Platform } from 'obsidian';
+import { App, Platform } from 'obsidian';
 
 const mocks = vi.hoisted(() => {
     const launchPrint = vi.fn();
@@ -21,6 +21,7 @@ const mocks = vi.hoisted(() => {
     });
     const onBeforePrint = vi.fn();
     const onAfterPrint = vi.fn();
+    const openAndroidPrintDocument = vi.fn();
     const Printd = vi.fn().mockImplementation(function Printd() {
         return {
             onBeforePrint,
@@ -33,6 +34,7 @@ const mocks = vi.hoisted(() => {
         Printd,
         print,
         launchPrint,
+        openAndroidPrintDocument,
         getLastPrintedElement: () => lastPrintedElement,
         resetLastPrintedElement: () => {
             lastPrintedElement = null;
@@ -42,6 +44,10 @@ const mocks = vi.hoisted(() => {
 
 vi.mock('printd', () => ({
     Printd: mocks.Printd
+}));
+
+vi.mock('../src/utils/androidPrintDocument', () => ({
+    openAndroidPrintDocument: mocks.openAndroidPrintDocument
 }));
 
 import { openPrintModal } from '../src/utils/printModal';
@@ -68,6 +74,8 @@ describe('openPrintModal', () => {
         Platform.isMobile = false;
         Platform.isDesktopApp = true;
         Platform.isMobileApp = false;
+        Platform.isIosApp = false;
+        Platform.isAndroidApp = false;
         delete (window as unknown as Window & { require?: unknown }).require;
     });
 
@@ -76,11 +84,15 @@ describe('openPrintModal', () => {
         Platform.isMobile = true;
         Platform.isDesktopApp = false;
         Platform.isMobileApp = true;
+        Platform.isIosApp = true;
+
+        const app = {} as App;
 
         const requireSpy = vi.fn();
         (window as unknown as Window & { require?: typeof requireSpy }).require = requireSpy;
 
         await openPrintModal(
+            app,
             'Mobile note',
             document.createElement('div'),
             {
@@ -93,6 +105,39 @@ describe('openPrintModal', () => {
         expect(requireSpy).not.toHaveBeenCalled();
         expect(getMockNotices()).toContain('Debug mode is only available in Obsidian desktop.');
         expect(mocks.launchPrint).toHaveBeenCalledOnce();
+    });
+
+    it('uses the standalone document path instead of Printd on Android', async () => {
+        Platform.isDesktop = false;
+        Platform.isMobile = true;
+        Platform.isDesktopApp = false;
+        Platform.isMobileApp = true;
+        Platform.isAndroidApp = true;
+
+        const app = {} as App;
+        const content = document.createElement('div');
+
+        await openPrintModal(
+            app,
+            'Android note',
+            content,
+            {
+                ...DEFAULT_SETTINGS,
+                normalizeStyle: true
+            },
+            'body { color: black; }',
+            ['invoice']
+        );
+
+        expect(mocks.openAndroidPrintDocument).toHaveBeenCalledWith(
+            app,
+            'Android note',
+            content,
+            'body { color: black; }',
+            ['invoice'],
+            false
+        );
+        expect(mocks.Printd).not.toHaveBeenCalled();
     });
 
     it('opens the Electron debug preview on desktop when debug mode is enabled', async () => {
@@ -120,7 +165,10 @@ describe('openPrintModal', () => {
 
         (window as unknown as Window & { require?: typeof requireSpy }).require = requireSpy;
 
+        const app = {} as App;
+
         await openPrintModal(
+            app,
             'Desktop note',
             document.createElement('div'),
             {
@@ -149,7 +197,10 @@ describe('openPrintModal', () => {
 
         content.appendChild(canvas);
 
+        const app = {} as App;
+
         await openPrintModal(
+            app,
             'PDF note',
             content,
             DEFAULT_SETTINGS,

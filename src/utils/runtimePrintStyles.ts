@@ -58,7 +58,7 @@ export function applyRuntimePrintClasses(doc: Document, includeAppClasses = true
     applyRuntimePrintClassesToElement(doc.body, includeAppClasses);
 }
 
-export function createDebugPrintHtml(
+export function createStandalonePrintHtml(
     content: HTMLElement,
     cssText: string,
     title = 'Print note',
@@ -74,6 +74,11 @@ export function createDebugPrintHtml(
     const metaElement = document.createElement('meta');
     metaElement.setAttribute('charset', 'utf-8');
     headElement.appendChild(metaElement);
+
+    const viewportElement = document.createElement('meta');
+    viewportElement.setAttribute('name', 'viewport');
+    viewportElement.setAttribute('content', 'width=device-width, initial-scale=1');
+    headElement.appendChild(viewportElement);
 
     const titleElement = document.createElement('title');
     titleElement.textContent = title;

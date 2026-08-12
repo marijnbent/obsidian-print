@@ -1,4 +1,5 @@
 import { Notice } from 'obsidian';
+import { generateBasePrintContent } from './generateBasePrintContent';
 
 interface PrintableViewLike {
     containerEl?: HTMLElement;
@@ -35,6 +36,11 @@ export function generateViewContent(
     view: PrintableViewLike | null | undefined,
     options: GenerateViewContentOptions = {}
 ): HTMLElement | void {
+    const basePrintContent = generateBasePrintContent(view, options);
+    if (basePrintContent) {
+        return basePrintContent;
+    }
+
     const sourceRoot = resolveViewRoot(view);
     if (!sourceRoot) {
         new Notice('Could not capture the current view for printing.');

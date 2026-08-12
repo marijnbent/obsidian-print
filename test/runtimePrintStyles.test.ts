@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
     applyRuntimePrintClasses,
-    createDebugPrintHtml,
+    createStandalonePrintHtml,
     getTargetedRuntimePrintCss
 } from '../src/utils/runtimePrintStyles';
 
@@ -184,7 +184,7 @@ describe('getTargetedRuntimePrintCss', () => {
         document.body.className = 'workspace theme-dark';
 
         try {
-            const debugContent = createDebugPrintHtml(
+            const debugContent = createStandalonePrintHtml(
                 document.createElement('div'),
                 '',
                 'Print note',
@@ -212,7 +212,7 @@ describe('getTargetedRuntimePrintCss', () => {
         document.body.className = 'workspace theme-dark is-focused';
 
         try {
-            const debugContent = createDebugPrintHtml(
+            const debugContent = createStandalonePrintHtml(
                 document.createElement('div'),
                 '',
                 'Print note',

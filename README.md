@@ -11,6 +11,7 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 - **Print the current note**: Trigger printing from the command palette, the printer ribbon, or by right-clicking a note.
 - **Print a selection**: Print only the selected text from the active editor.
 - **Print all notes in a folder**: Right-click on a folder or use the command palette to print all markdown notes in that folder.
+- **Print on mobile**: Use AirPrint on iOS, or open a standalone print document in the default browser on Android.
 
 You can also add a shortcut to the print action for even quicker access.
 
@@ -57,3 +58,7 @@ In the settings, you can optionally hide the title, and when **Normalize style**
 To further customize the appearance of your printed notes, you can create a `print.css` snippet in `.obsidian/snippets` and enable it from the plugin settings once Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
 If you have trouble with the styling, enable Debug Mode to open an inspection window for the generated print document.
+
+## Mobile printing
+
+On iOS, the plugin opens the native AirPrint dialog. Android does not let JavaScript start its native print dialog, so the plugin creates `obsidian-print-output.html` in the vault root and opens it in the default browser. Use the browser menu to print or save the document. The plugin reuses this generated file for later prints and never replaces an existing file that it did not create.

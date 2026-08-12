@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.5.5 - 2026-08-12
+
+- Added printing on iOS and Android.
+- Added complete Bases table printing, including grouped and off-screen rows.
+- Embedded local images in Android print documents without overwriting user files.
+
 ## 0.5.4 - 2026-04-30
 
 - Fixed themed property printing adding a blank first page.

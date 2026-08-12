@@ -1,8 +1,12 @@
 # Changelog
 
+## 0.5.6 - 2026-08-12
+
+- Changed iOS printing to use the native share sheet.
+
 ## 0.5.5 - 2026-08-12
 
-- Added printing on iOS and Android.
+- Added mobile plugin support and Android browser printing.
 - Added complete Bases table printing, including grouped and off-screen rows.
 - Embedded local images in Android print documents without overwriting user files.
 

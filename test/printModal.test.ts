@@ -22,6 +22,7 @@ const mocks = vi.hoisted(() => {
     const onBeforePrint = vi.fn();
     const onAfterPrint = vi.fn();
     const openAndroidPrintDocument = vi.fn();
+    const openIosPrintDocument = vi.fn();
     const Printd = vi.fn().mockImplementation(function Printd() {
         return {
             onBeforePrint,
@@ -35,6 +36,7 @@ const mocks = vi.hoisted(() => {
         print,
         launchPrint,
         openAndroidPrintDocument,
+        openIosPrintDocument,
         getLastPrintedElement: () => lastPrintedElement,
         resetLastPrintedElement: () => {
             lastPrintedElement = null;
@@ -48,6 +50,10 @@ vi.mock('printd', () => ({
 
 vi.mock('../src/utils/androidPrintDocument', () => ({
     openAndroidPrintDocument: mocks.openAndroidPrintDocument
+}));
+
+vi.mock('../src/utils/iosPrintDocument', () => ({
+    openIosPrintDocument: mocks.openIosPrintDocument
 }));
 
 import { openPrintModal } from '../src/utils/printModal';
@@ -104,7 +110,15 @@ describe('openPrintModal', () => {
 
         expect(requireSpy).not.toHaveBeenCalled();
         expect(getMockNotices()).toContain('Debug mode is only available in Obsidian desktop.');
-        expect(mocks.launchPrint).toHaveBeenCalledOnce();
+        expect(mocks.openIosPrintDocument).toHaveBeenCalledWith(
+            app,
+            'Mobile note',
+            expect.any(HTMLElement),
+            'body { color: black; }',
+            [],
+            true
+        );
+        expect(mocks.Printd).not.toHaveBeenCalled();
     });
 
     it('uses the standalone document path instead of Printd on Android', async () => {

@@ -9,8 +9,9 @@ import {
 import { openDebugPrintPreview } from './printEnvironment';
 import { syncPrintableCloneState } from './syncPrintableClone';
 import { openAndroidPrintDocument } from './androidPrintDocument';
+import { openIosPrintDocument } from './iosPrintDocument';
 
-/** Print prepared content through Printd, or through a browser document on Android. */
+/** Print prepared content through Printd or a platform-specific mobile handoff. */
 export async function openPrintModal(
     app: App,
     title: string,
@@ -52,6 +53,18 @@ export async function openPrintModal(
 
     if (Platform.isAndroidApp) {
         await openAndroidPrintDocument(
+            app,
+            title,
+            content,
+            combinedCssString,
+            bodyClasses,
+            includeThemeStyles
+        );
+        return;
+    }
+
+    if (Platform.isIosApp) {
+        await openIosPrintDocument(
             app,
             title,
             content,

@@ -33,6 +33,43 @@ export class Notice {
     }
 }
 
+export class Modal {
+    app: unknown;
+    containerEl: HTMLDivElement;
+    modalEl: HTMLDivElement;
+    titleEl: HTMLHeadingElement;
+    contentEl: HTMLDivElement;
+
+    constructor(app: unknown) {
+        this.app = app;
+        this.containerEl = document.createElement('div');
+        this.modalEl = document.createElement('div');
+        this.titleEl = document.createElement('h2');
+        this.contentEl = document.createElement('div');
+        this.modalEl.append(this.titleEl, this.contentEl);
+        this.containerEl.appendChild(this.modalEl);
+    }
+
+    open(): void {
+        document.body.appendChild(this.containerEl);
+        void this.onOpen();
+    }
+
+    close(): void {
+        this.containerEl.remove();
+        this.onClose();
+    }
+
+    onOpen(): void | Promise<void> {}
+
+    onClose(): void {}
+
+    setTitle(title: string): this {
+        this.titleEl.textContent = title;
+        return this;
+    }
+}
+
 export class TFile {
     path: string;
     basename: string;

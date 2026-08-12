@@ -5,9 +5,6 @@ import {
 } from './portablePrintDocument';
 import { createIosPdfDocument } from './iosPdfDocument';
 
-const FALLBACK_FILE_NAME = 'obsidian-print-ios-output.pdf';
-const MAX_FALLBACK_FILE_CANDIDATES = 100;
-
 /** Prepare a PDF, then share it from a fresh tap required by iOS. */
 export async function openIosPrintDocument(
     app: App,
@@ -46,72 +43,51 @@ export async function openIosPrintDocument(
 
     showPortableImageWarning(failedImageCount);
 
-    new IosPrintModal(
-        app,
-        file,
-        pdfData,
-        canShareFile(file)
-    ).open();
+    if (!canShareFile(file)) {
+        new Notice('This device cannot share the print PDF.');
+        return;
+    }
+
+    new IosPrintModal(app, file).open();
 }
 
 class IosPrintModal extends Modal {
     private readonly file: File;
-    private readonly pdfData: ArrayBuffer;
-    private readonly canShare: boolean;
 
-    constructor(app: App, file: File, pdfData: ArrayBuffer, canShare: boolean) {
+    constructor(app: App, file: File) {
         super(app);
         this.file = file;
-        this.pdfData = pdfData;
-        this.canShare = canShare;
     }
 
     onOpen(): void {
-        this.setTitle('Print on iOS');
+        this.contentEl.addClass('obsidian-print-ios-content');
+        this.setTitle('Ready to print');
         this.contentEl.createEl('p', {
-            text: this.canShare
-                ? 'Open the iOS share sheet, then select Print.'
-                : 'This Obsidian version cannot share PDF files on iOS. You can save the PDF in your vault instead.'
+            text: 'Open the iOS share sheet, then select Print.'
         });
 
-        if (this.canShare) {
-            const shareButton = this.contentEl.createEl('button', {
-                text: 'Open print options'
-            });
-            shareButton.addClass('mod-cta');
-            shareButton.addEventListener('click', () => {
-                let shareResult: Promise<void>;
-
-                try {
-                    // This call must stay synchronous with the tap. iOS consumes the user activation here.
-                    shareResult = navigator.share({ files: [this.file] });
-                } catch (error) {
-                    handleShareError(error);
-                    return;
-                }
-
-                shareButton.disabled = true;
-                void shareResult.then(() => {
-                    this.close();
-                }).catch((error: unknown) => {
-                    shareButton.disabled = false;
-                    handleShareError(error);
-                });
-            });
-        }
-
-        const saveButton = this.contentEl.createEl('button', {
-            text: 'Save PDF'
+        const shareButton = this.contentEl.createEl('button', {
+            text: 'Continue to print'
         });
-        saveButton.addEventListener('click', () => {
-            saveButton.disabled = true;
-            void saveFallbackFile(this.app, this.pdfData).then((path) => {
-                new Notice(`Saved the printable PDF as "${path}".`);
+        shareButton.addClass('mod-cta');
+        shareButton.addClass('obsidian-print-ios-button');
+        shareButton.addEventListener('click', () => {
+            let shareResult: Promise<void>;
+
+            try {
+                // This call must stay synchronous with the tap. iOS consumes the user activation here.
+                shareResult = navigator.share({ files: [this.file] });
+            } catch (error) {
+                handleShareError(error);
+                return;
+            }
+
+            shareButton.disabled = true;
+            void shareResult.then(() => {
                 this.close();
             }).catch((error: unknown) => {
-                saveButton.disabled = false;
-                console.error('Could not save the iOS print PDF:', error);
-                new Notice('Could not save the printable PDF.');
+                shareButton.disabled = false;
+                handleShareError(error);
             });
         });
     }
@@ -134,30 +110,8 @@ function handleShareError(error: unknown): void {
         return;
     }
 
-    console.error('Could not open the iOS print options:', error);
-    new Notice('Could not open the iOS print options. Try again.');
-}
-
-async function saveFallbackFile(app: App, pdfData: ArrayBuffer): Promise<string> {
-    for (let index = 1; index <= MAX_FALLBACK_FILE_CANDIDATES; index++) {
-        const path = getFallbackPath(index);
-        if (app.vault.getAbstractFileByPath(path)) {
-            continue;
-        }
-
-        const file = await app.vault.createBinary(path, pdfData);
-        return file.path;
-    }
-
-    throw new Error('No safe iOS output filename is available.');
-}
-
-function getFallbackPath(index: number): string {
-    if (index === 1) {
-        return FALLBACK_FILE_NAME;
-    }
-
-    return `obsidian-print-ios-output-${index}.pdf`;
+    console.error('Could not open the iOS share sheet:', error);
+    new Notice('Could not open the iOS share sheet. Try again.');
 }
 
 function isAbortError(error: unknown): boolean {

@@ -25,8 +25,7 @@ function createApp(): App {
     return {
         vault: {
             readBinary: vi.fn(),
-            getAbstractFileByPath: vi.fn(() => null),
-            createBinary: vi.fn(async (path: string) => ({ path }))
+            getAbstractFileByPath: vi.fn(() => null)
         },
         metadataCache: {
             getFirstLinkpathDest: vi.fn()
@@ -50,7 +49,7 @@ function setShareApi(
 
 function getShareButton(): HTMLButtonElement {
     const button = Array.from(document.querySelectorAll('button'))
-        .find((candidate) => candidate.textContent === 'Open print options');
+        .find((candidate) => candidate.textContent === 'Continue to print');
 
     if (!(button instanceof HTMLButtonElement)) {
         throw new Error('The iOS share button was not found.');
@@ -122,6 +121,10 @@ describe('openIosPrintDocument', () => {
 
         expect(share).not.toHaveBeenCalled();
         expect(canShare).toHaveBeenCalledOnce();
+        expect(document.querySelectorAll('button')).toHaveLength(1);
+        expect(document.body.textContent).toContain('Ready to print');
+        expect(document.querySelector('.obsidian-print-ios-content')).not.toBeNull();
+        expect(document.querySelector('.obsidian-print-ios-button')).toBe(getShareButton());
         expect(mocks.createIosPdfDocument).toHaveBeenCalledWith(
             expect.stringContaining('Quarterly report')
         );
@@ -162,72 +165,26 @@ describe('openIosPrintDocument', () => {
         shareButton.click();
         await vi.waitFor(() => expect(shareButton.disabled).toBe(false));
 
-        expect(getMockNotices()).not.toContain('Could not open the iOS print options. Try again.');
+        expect(getMockNotices()).not.toContain('Could not open the iOS share sheet. Try again.');
         expect(document.body.contains(shareButton)).toBe(true);
     });
 
-    it('offers a safe vault file when iOS cannot share the PDF', async () => {
+    it('reports when iOS cannot share the PDF', async () => {
         const share = vi.fn(() => Promise.resolve());
         setShareApi(share, () => false);
-        const app = createApp();
 
         await openIosPrintDocument(
-            app,
+            createApp(),
             'Unsupported print',
             document.createElement('div'),
             ''
         );
 
         expect(share).not.toHaveBeenCalled();
-        expect(document.body.textContent).toContain(
-            'This Obsidian version cannot share PDF files on iOS.'
+        expect(getMockNotices()).toContain(
+            'This device cannot share the print PDF.'
         );
-        expect(() => getShareButton()).toThrow();
-
-        const saveButton = Array.from(document.querySelectorAll('button'))
-            .find((candidate) => candidate.textContent === 'Save PDF');
-        expect(saveButton).toBeInstanceOf(HTMLButtonElement);
-        (saveButton as HTMLButtonElement).click();
-
-        await vi.waitFor(() => {
-            expect(app.vault.createBinary).toHaveBeenCalledWith(
-                'obsidian-print-ios-output.pdf',
-                expect.any(ArrayBuffer)
-            );
-            expect(getMockNotices()).toContain(
-                'Saved the printable PDF as "obsidian-print-ios-output.pdf".'
-            );
-        });
-
-        const savedData = (app.vault.createBinary as ReturnType<typeof vi.fn>).mock.calls[0]?.[1];
-        expect(Array.from(new Uint8Array(savedData))).toEqual(PDF_BYTES);
-    });
-
-    it('does not replace an existing PDF when saving the fallback', async () => {
-        setShareApi(vi.fn(() => Promise.resolve()), () => false);
-        const app = createApp();
-        (app.vault.getAbstractFileByPath as ReturnType<typeof vi.fn>)
-            .mockImplementation((path: string) => (
-                path === 'obsidian-print-ios-output.pdf' ? { path } : null
-            ));
-
-        await openIosPrintDocument(
-            app,
-            'Safe fallback',
-            document.createElement('div'),
-            ''
-        );
-
-        const saveButton = Array.from(document.querySelectorAll('button'))
-            .find((candidate) => candidate.textContent === 'Save PDF') as HTMLButtonElement;
-        saveButton.click();
-
-        await vi.waitFor(() => {
-            expect(app.vault.createBinary).toHaveBeenCalledWith(
-                'obsidian-print-ios-output-2.pdf',
-                expect.any(ArrayBuffer)
-            );
-        });
+        expect(document.querySelector('button')).toBeNull();
     });
 
     it('reports a share failure and allows a retry', async () => {
@@ -247,8 +204,8 @@ describe('openIosPrintDocument', () => {
         shareButton.click();
         await vi.waitFor(() => expect(shareButton.disabled).toBe(false));
 
-        expect(consoleError).toHaveBeenCalledWith('Could not open the iOS print options:', error);
-        expect(getMockNotices()).toContain('Could not open the iOS print options. Try again.');
+        expect(consoleError).toHaveBeenCalledWith('Could not open the iOS share sheet:', error);
+        expect(getMockNotices()).toContain('Could not open the iOS share sheet. Try again.');
         expect(document.body.contains(shareButton)).toBe(true);
     });
 

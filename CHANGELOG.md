@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.8 - 2026-08-12
+
+- Simplified the iOS print step to one clear Continue to print button.
+
 ## 0.5.7 - 2026-08-12
 
 - Generated printable PDFs on iOS so the share sheet offers Print.

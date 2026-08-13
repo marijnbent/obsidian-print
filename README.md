@@ -11,7 +11,7 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 - **Print the current note**: Trigger printing from the command palette, the printer ribbon, or by right-clicking a note.
 - **Print a selection**: Print only the selected text from the active editor.
 - **Print all notes in a folder**: Right-click on a folder or use the command palette to print all markdown notes in that folder.
-- **Print on mobile**: Generate an A4 PDF on iOS and select Print in the native share sheet, or open a standalone print document in the default browser on Android.
+- **Print on desktop and mobile**: Use the system print dialog on desktop, generate an A4 PDF on iOS, or open a standalone print document in your Android browser.
 
 You can also add a shortcut to the print action for even quicker access.
 
@@ -55,10 +55,13 @@ If you print often, you probably want to add a shortcut to one or more print com
 
 In the settings, you can optionally hide the title, and when **Normalize style** is enabled you can also adjust the font size for body text and headings.
 
-To further customize the appearance of your printed notes, you can create a `print.css` snippet in `.obsidian/snippets` and enable it from the plugin settings once Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
+To further customize the appearance of your printed notes, you can create a `print.css` snippet in `.obsidian/snippets` and enable it from the plugin settings once Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. Print output uses a 12 mm page margin by default. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
 If you have trouble with the styling, enable Debug Mode to open an inspection window for the generated print document.
 
 ## Mobile printing
 
-On iOS, the plugin generates an A4 PDF and then shows a **Continue to print** button. Tap it to open the native share sheet, then select **Print**. PDF pages use images to preserve Obsidian styling and characters, so their text is not selectable. On Android, the plugin saves a printable HTML file in the vault and opens it in your default browser. Use the browser menu to print it. The plugin reuses files it generated and does not replace your files.
+The plugin supports Obsidian on iPhone, iPad, and Android.
+
+- **iOS and iPadOS**: The plugin generates an A4 PDF and shows a **Continue to print** button. Tap it to open the native share sheet, then select **Print**. Each PDF page is an image so Obsidian styles, local images, and characters stay intact. The text in the PDF is not selectable.
+- **Android**: The plugin saves a standalone HTML print document in the vault and opens it in your default browser. Use the browser menu to print it. Local images are included. The plugin reuses only files that it generated and does not replace your files.

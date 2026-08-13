@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.9 - 2026-08-13
+
+- Added safe page margins to desktop and mobile print output.
+- Documented iOS, iPadOS, and Android printing.
+
 ## 0.5.8 - 2026-08-12
 
 - Simplified the iOS print step to one clear Continue to print button.

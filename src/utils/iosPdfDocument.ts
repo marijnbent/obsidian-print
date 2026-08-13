@@ -1,9 +1,14 @@
 import html2canvas from 'html2canvas-pro';
 import { jsPDF } from 'jspdf';
 
-const PAGE_CONTENT_WIDTH_PX = 754;
-const PAGE_CONTENT_HEIGHT_PX = 1083;
-const PAGE_MARGIN_PT = 15;
+const A4_WIDTH_MM = 210;
+const A4_HEIGHT_MM = 297;
+const PAGE_MARGIN_MM = 12;
+const CSS_PIXELS_PER_MM = 96 / 25.4;
+const PDF_POINTS_PER_MM = 72 / 25.4;
+const PAGE_CONTENT_WIDTH_PX = Math.round((A4_WIDTH_MM - (PAGE_MARGIN_MM * 2)) * CSS_PIXELS_PER_MM);
+const PAGE_CONTENT_HEIGHT_PX = Math.round((A4_HEIGHT_MM - (PAGE_MARGIN_MM * 2)) * CSS_PIXELS_PER_MM);
+const PAGE_MARGIN_PT = PAGE_MARGIN_MM * PDF_POINTS_PER_MM;
 const RENDER_SCALE = 1.5;
 const ASSET_TIMEOUT_MS = 10000;
 const POSITION_TOLERANCE_PX = 1;

@@ -3,7 +3,7 @@ export const NORMALIZED_PRINT_STYLES = `
 
     body {
         font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Microsoft YaHei Light", sans-serif;
-        margin: 20px;
+        margin: 0;
     }
 
     .markdown-preview-sizer {

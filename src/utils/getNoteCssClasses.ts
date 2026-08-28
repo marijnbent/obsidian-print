@@ -5,13 +5,16 @@ export function getNoteCssClasses(app: App, file?: TFile | null): string[] {
         return [];
     }
 
-    const frontmatter = app.metadataCache.getFileCache(file)?.frontmatter as
-        | Record<string, unknown>
-        | undefined;
+    const cachedFrontmatter: unknown = app.metadataCache.getFileCache(file)?.frontmatter;
+    const frontmatter = isRecord(cachedFrontmatter) ? cachedFrontmatter : null;
 
     const rawValue = frontmatter?.cssclasses ?? frontmatter?.cssClasses;
 
     return Array.from(new Set(normalizeCssClasses(rawValue)));
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null && !Array.isArray(value);
 }
 
 function normalizeCssClasses(value: unknown): string[] {

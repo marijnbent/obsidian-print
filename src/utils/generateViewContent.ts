@@ -57,7 +57,7 @@ export function generateViewContent(
         content.createEl('h1', { text: options.title });
     }
 
-    const wrapper = document.createElement('div');
+    const wrapper = createDiv();
     wrapper.className = 'obsidian-print-note obsidian-print-view';
 
     const clonedRoot = sourceRoot.cloneNode(true) as HTMLElement;

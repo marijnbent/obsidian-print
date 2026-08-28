@@ -2,12 +2,26 @@
     margin: 12mm;
 }
 
+.obsidian-print-frame,
+.obsidian-print-render-frame {
+    position: fixed;
+    left: -100000px;
+    top: 0;
+    border: 0;
+    pointer-events: none;
+}
+
+.obsidian-print-frame {
+    width: 0;
+    height: 0;
+}
+
 @media print {
 
     html,
-    body {
+    body.obsidian-print {
         color-scheme: light;
-        background: #fff !important;
+        background: #fff;
         color: #111827;
     }
 
@@ -21,11 +35,12 @@
         print-color-adjust: exact;
     }
 
-    .markdown-preview-sizer {
-        min-height: 0 !important;
-        padding: 0 !important;
+    .obsidian-print .markdown-preview-sizer {
+        min-height: 0;
+        padding: 0;
     }
 
+    /* The cloned views can contain inline virtualization styles. */
     .obsidian-print-view,
     .obsidian-print-view .view-content,
     .obsidian-print-view .markdown-reading-view,
@@ -84,7 +99,14 @@
     }
 
     .obsidian-print-page-break {
-        page-break-before: always;
+        break-before: page;
+    }
+
+    .obsidian-print-pdf-page-break-spacer {
+        display: block;
+        width: 100%;
+        flex: 0 0 auto;
+        visibility: hidden;
     }
 
     .callout,
@@ -106,12 +128,12 @@
         margin-block: 1rem;
     }
 
-    .callout.is-collapsed .callout-content {
-        display: block !important;
+    .obsidian-print .callout.is-collapsed .callout-content {
+        display: block;
     }
 
-    .callout-fold {
-        display: none !important;
+    .obsidian-print .callout-fold {
+        display: none;
     }
 
     .callout-content > :first-child,

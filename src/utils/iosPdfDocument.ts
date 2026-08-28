@@ -1,5 +1,5 @@
 import html2canvas from 'html2canvas-pro';
-import { jsPDF } from 'jspdf';
+import { PDFDocument } from 'pdf-lib';
 
 const A4_WIDTH_MM = 210;
 const A4_HEIGHT_MM = 297;
@@ -62,6 +62,7 @@ export async function createIosPdfDocument(html: string): Promise<ArrayBuffer> {
         }
 
         writeRenderDocument(frameDocument, html);
+        await waitForDocumentStyles(frameDocument);
         activatePrintStyles(frameDocument);
         await waitForDocumentAssets(frameDocument);
         await waitForLayout();
@@ -177,16 +178,14 @@ function getPageEdgeSafety(pageHeight: number): number {
 }
 
 function createRenderFrame(): HTMLIFrameElement {
-    const frame = document.createElement('iframe');
+    const frame = createEl('iframe');
+    frame.addClass('obsidian-print-render-frame');
     frame.setAttribute('aria-hidden', 'true');
     frame.tabIndex = -1;
-    frame.style.position = 'fixed';
-    frame.style.left = '-100000px';
-    frame.style.top = '0';
-    frame.style.width = `${PAGE_CONTENT_WIDTH_PX}px`;
-    frame.style.height = `${PAGE_CONTENT_HEIGHT_PX}px`;
-    frame.style.border = '0';
-    frame.style.pointerEvents = 'none';
+    frame.setCssStyles({
+        width: `${PAGE_CONTENT_WIDTH_PX}px`,
+        height: `${PAGE_CONTENT_HEIGHT_PX}px`
+    });
     document.body.appendChild(frame);
     return frame;
 }
@@ -207,16 +206,16 @@ function activatePrintStyles(doc: Document): void {
 
         try {
             rules = styleSheet.cssRules;
-        } catch (error) {
+        } catch {
             return;
         }
 
         Array.from(rules).forEach((rule) => {
-            if (rule.type !== CSSRule.MEDIA_RULE) {
+            if (!(rule instanceof CSSMediaRule)) {
                 return;
             }
 
-            const mediaRule = rule as CSSMediaRule;
+            const mediaRule = rule;
             if (!/\bprint\b/i.test(mediaRule.conditionText)) {
                 return;
             }
@@ -225,8 +224,7 @@ function activatePrintStyles(doc: Document): void {
         });
     });
 
-    const captureStyles = doc.createElement('style');
-    captureStyles.textContent = `
+    const captureCss = `
 ${printRules.join('\n')}
 html,
 body {
@@ -245,7 +243,29 @@ body {
     transition: none !important;
 }
 `;
-    doc.head.appendChild(captureStyles);
+    const StyleSheet = doc.defaultView?.CSSStyleSheet ?? CSSStyleSheet;
+    const stylesheet = new StyleSheet();
+    stylesheet.replaceSync(captureCss);
+    doc.adoptedStyleSheets = [...doc.adoptedStyleSheets, stylesheet];
+}
+
+async function waitForDocumentStyles(doc: Document): Promise<void> {
+    await Promise.all(Array.from(doc.querySelectorAll<HTMLLinkElement>('link[rel="stylesheet"]'))
+        .map(waitForStylesheet));
+}
+
+async function waitForStylesheet(stylesheet: HTMLLinkElement): Promise<void> {
+    if (stylesheet.sheet) {
+        return;
+    }
+
+    await Promise.race([
+        new Promise<void>((resolve) => {
+            stylesheet.addEventListener('load', () => resolve(), { once: true });
+            stylesheet.addEventListener('error', () => resolve(), { once: true });
+        }),
+        new Promise<void>((resolve) => window.setTimeout(resolve, ASSET_TIMEOUT_MS))
+    ]);
 }
 
 async function waitForDocumentAssets(doc: Document): Promise<void> {
@@ -294,9 +314,7 @@ export function addPageBreakSpacers(root: HTMLElement): void {
         .filter((element) => {
             const styles = element.ownerDocument.defaultView?.getComputedStyle(element);
             const breakBefore = styles?.breakBefore ?? '';
-            const pageBreakBefore = styles?.pageBreakBefore ?? '';
-            return /^(?:always|page|left|right)$/i.test(breakBefore)
-                || /^(?:always|left|right)$/i.test(pageBreakBefore);
+            return /^(?:always|page|left|right)$/i.test(breakBefore);
         });
     const avoidBreakElements = Array.from(
         root.querySelectorAll<HTMLElement>(AVOID_PAGE_BREAK_SELECTOR)
@@ -371,7 +389,7 @@ function addSpaceBeforeElement(
     let spacerHeight = pageEnd + PAGE_START_SPACE_PX - elementTop;
 
     spacer.setAttribute('aria-hidden', 'true');
-    spacer.style.visibility = 'hidden';
+    spacer.addClass('obsidian-print-pdf-page-break-spacer');
     setSpacerHeight(spacer, spacerHeight);
     element.before(spacer);
 
@@ -383,12 +401,8 @@ function addSpaceBeforeElement(
 }
 
 function createPageBreakSpacer(element: HTMLElement): HTMLElement {
-    const doc = element.ownerDocument;
-
-    const block = doc.createElement('div');
-    block.style.display = 'block';
-    block.style.width = '100%';
-    block.style.flex = '0 0 auto';
+    const block = element.ownerDocument.body.createDiv();
+    block.remove();
     return block;
 }
 
@@ -399,24 +413,13 @@ function setSpacerHeight(spacer: HTMLElement, height: number): void {
 }
 
 async function renderPageSlices(root: HTMLElement, slices: PdfPageSlice[]): Promise<ArrayBuffer> {
-    const pdf = new jsPDF({
-        unit: 'pt',
-        format: 'a4',
-        orientation: 'portrait',
-        compress: true,
-        putOnlyUsedFonts: true
-    });
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
+    const pdf = await PDFDocument.create();
+    const pageWidth = A4_WIDTH_MM * PDF_POINTS_PER_MM;
+    const pageHeight = A4_HEIGHT_MM * PDF_POINTS_PER_MM;
     const imageWidth = pageWidth - (PAGE_MARGIN_PT * 2);
     const imageMaxHeight = pageHeight - (PAGE_MARGIN_PT * 2);
 
-    for (let index = 0; index < slices.length; index++) {
-        if (index > 0) {
-            pdf.addPage('a4', 'portrait');
-        }
-
-        const slice = slices[index];
+    for (const slice of slices) {
         const canvas = await html2canvas(root, {
             x: 0,
             y: slice.y,
@@ -439,16 +442,14 @@ async function renderPageSlices(root: HTMLElement, slices: PdfPageSlice[]): Prom
         try {
             const jpegBytes = await canvasToJpeg(canvas);
             const imageHeight = imageMaxHeight * (slice.height / PAGE_CONTENT_HEIGHT_PX);
-            pdf.addImage(
-                jpegBytes,
-                'JPEG',
-                PAGE_MARGIN_PT,
-                PAGE_MARGIN_PT,
-                imageWidth,
-                imageHeight,
-                undefined,
-                'FAST'
-            );
+            const image = await pdf.embedJpg(jpegBytes);
+            const page = pdf.addPage([pageWidth, pageHeight]);
+            page.drawImage(image, {
+                x: PAGE_MARGIN_PT,
+                y: pageHeight - PAGE_MARGIN_PT - imageHeight,
+                width: imageWidth,
+                height: imageHeight
+            });
         } finally {
             canvas.width = 1;
             canvas.height = 1;
@@ -457,7 +458,11 @@ async function renderPageSlices(root: HTMLElement, slices: PdfPageSlice[]): Prom
         await yieldToBrowser();
     }
 
-    return pdf.output('arraybuffer');
+    const pdfBytes = await pdf.save({ useObjectStreams: true });
+    return pdfBytes.buffer.slice(
+        pdfBytes.byteOffset,
+        pdfBytes.byteOffset + pdfBytes.byteLength
+    ) as ArrayBuffer;
 }
 
 async function canvasToJpeg(canvas: HTMLCanvasElement): Promise<Uint8Array> {

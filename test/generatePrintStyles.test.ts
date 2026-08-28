@@ -7,7 +7,7 @@ describe('generatePrintStyles', () => {
         const app = {
             vault: {
                 adapter: {
-                    read: async () => '@media print { .obsidian-print-page-break { page-break-before: always; } }'
+                    read: async () => '@media print { .obsidian-print-page-break { break-before: page; } }'
                 }
             },
             customCss: {
@@ -49,7 +49,7 @@ describe('generatePrintStyles', () => {
         const app = {
             vault: {
                 adapter: {
-                    read: async () => '@media print { .obsidian-print-page-break { page-break-before: always; } }'
+                    read: async () => '@media print { .obsidian-print-page-break { break-before: page; } }'
                 }
             },
             customCss: {

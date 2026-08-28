@@ -83,6 +83,8 @@ flowchart TD
 
         expect(content?.querySelector('.mermaid')).toBeTruthy();
         expect(content?.querySelector('svg[data-mermaid-id]')).toBeTruthy();
+        expect(content?.querySelector('svg[data-mermaid-id]')?.hasAttribute('onclick')).toBe(false);
+        expect(content?.querySelector('script')).toBeNull();
         expect(content?.textContent).toContain('Start --> Finish');
         expect(content?.querySelector('pre code.language-mermaid')).toBeFalsy();
     });

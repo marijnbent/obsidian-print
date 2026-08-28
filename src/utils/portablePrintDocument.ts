@@ -81,7 +81,7 @@ async function inlineLocalImages(content: HTMLElement, app: App): Promise<number
             const data = await app.vault.readBinary(imageFile);
             image.src = `data:${mimeType};base64,${arrayBufferToBase64(data)}`;
             image.removeAttribute('srcset');
-        } catch (error) {
+        } catch {
             failedImageCount++;
         }
     }

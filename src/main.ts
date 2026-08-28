@@ -1,6 +1,6 @@
 import { Plugin, Notice, TFile, TFolder, MarkdownView } from 'obsidian';
 import { PrintSettingTab } from './settings';
-import { PrintPluginSettings, DEFAULT_SETTINGS } from './types';
+import { loadPrintPluginSettings, PrintPluginSettings } from './types';
 import { openPrintModal } from './utils/printModal';
 import { generatePreviewContent } from './utils/generatePreviewContent';
 import { generatePrintStyles } from './utils/generatePrintStyles';
@@ -29,17 +29,9 @@ export default class PrintPlugin extends Plugin {
     settings: PrintPluginSettings;
 
     async onload() {
-        console.log('Print plugin loaded');
-        const loadedSettings = await this.loadData();
-        this.settings = Object.assign({}, DEFAULT_SETTINGS, loadedSettings);
+        this.settings = loadPrintPluginSettings(await this.loadData());
 
-        if (
-            loadedSettings?.inheritNoteCssClasses === undefined &&
-            typeof loadedSettings?.extraClasses === 'boolean'
-        ) {
-            this.settings.inheritNoteCssClasses = loadedSettings.extraClasses;
-        }
-
+        // Keep the existing IDs because command IDs are stored in user hotkey settings.
         this.addCommand({
             id: 'print-note',
             name: 'Current note',
@@ -48,7 +40,7 @@ export default class PrintPlugin extends Plugin {
 
         this.addCommand({
             id: 'print-selection',
-            name: 'Print selection',
+            name: 'Selection',
             callback: async () => await this.printSelection(),
         });
 
@@ -73,12 +65,12 @@ export default class PrintPlugin extends Plugin {
                             .setIcon('printer')
                             .onClick(async () => await this.printNote(file));
                     });
-                } else {
+                } else if (file instanceof TFolder) {
                     menu.addItem((item) => {
                         item
                             .setTitle('Print all notes in folder')
                             .setIcon('printer')
-                            .onClick(async () => await this.printFolder(file as TFolder));
+                            .onClick(async () => await this.printFolder(file));
                     });
                 }
             })
@@ -142,7 +134,7 @@ export default class PrintPlugin extends Plugin {
         const files = this.getSortedMarkdownFiles(activeFolder);
 
         if (files.length === 0) {
-            new Notice('No markdown files found in the folder.');
+            new Notice('No Markdown files found in the folder.');
             return;
         }
 
@@ -330,7 +322,7 @@ export default class PrintPlugin extends Plugin {
         };
         const activeFileView = workspaceWithActiveFileView.getActiveFileView?.();
         if (activeFileView) {
-            return activeFileView as ActiveFileViewLike;
+            return activeFileView;
         }
 
         const activeLeaf = (this.app.workspace as unknown as { activeLeaf?: { view?: ActiveFileViewLike } }).activeLeaf;

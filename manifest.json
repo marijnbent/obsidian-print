@@ -1,10 +1,10 @@
 {
 	"id": "print",
 	"name": "Print",
-	"version": "0.5.9",
+	"version": "0.6.0",
 	"isDesktopOnly": false,
 	"minAppVersion": "1.6.0",
-	"description": "Print notes and documents directly from your workspace.",
+	"description": "Create clean printouts and PDFs from notes and documents.",
 	"author": "Marijn Bent",
 	"authorUrl": "https://marijnbent.nl",
 	"fundingUrl": "https://buymeacoffee.com/marijnbent"

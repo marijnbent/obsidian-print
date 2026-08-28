@@ -2,39 +2,27 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { App, Platform } from 'obsidian';
 
 const mocks = vi.hoisted(() => {
-    const launchPrint = vi.fn();
     let lastPrintedElement: HTMLElement | null = null;
-    const print = vi.fn((content, _styles, _scripts, callback) => {
-        const iframeDocument = document.implementation.createHTMLDocument('Print');
+    const openDesktopPrintDocument = vi.fn((_title, content: HTMLElement) => {
         const element = content.cloneNode(true) as HTMLElement;
-        lastPrintedElement = element;
-        iframeDocument.body.appendChild(element);
-        const iframe = {
-            contentDocument: iframeDocument
-        };
-
-        callback?.({
-            iframe,
-            element,
-            launchPrint
+        const sourceCanvases = Array.from(content.querySelectorAll('canvas'));
+        const clonedCanvases = Array.from(element.querySelectorAll('canvas'));
+        sourceCanvases.forEach((canvas, index) => {
+            const image = document.createElement('img');
+            image.src = canvas.toDataURL();
+            image.className = canvas.className;
+            Array.from(canvas.attributes).forEach((attribute) => {
+                image.setAttribute(attribute.name, attribute.value);
+            });
+            clonedCanvases[index]?.replaceWith(image);
         });
+        lastPrintedElement = element;
     });
-    const onBeforePrint = vi.fn();
-    const onAfterPrint = vi.fn();
     const openAndroidPrintDocument = vi.fn();
     const openIosPrintDocument = vi.fn();
-    const Printd = vi.fn().mockImplementation(function Printd() {
-        return {
-            onBeforePrint,
-            onAfterPrint,
-            print
-        };
-    });
 
     return {
-        Printd,
-        print,
-        launchPrint,
+        openDesktopPrintDocument,
         openAndroidPrintDocument,
         openIosPrintDocument,
         getLastPrintedElement: () => lastPrintedElement,
@@ -44,8 +32,8 @@ const mocks = vi.hoisted(() => {
     };
 });
 
-vi.mock('printd', () => ({
-    Printd: mocks.Printd
+vi.mock('../src/utils/desktopPrintDocument', () => ({
+    openDesktopPrintDocument: mocks.openDesktopPrintDocument
 }));
 
 vi.mock('../src/utils/androidPrintDocument', () => ({
@@ -118,10 +106,10 @@ describe('openPrintModal', () => {
             [],
             true
         );
-        expect(mocks.Printd).not.toHaveBeenCalled();
+        expect(mocks.openDesktopPrintDocument).not.toHaveBeenCalled();
     });
 
-    it('uses the standalone document path instead of Printd on Android', async () => {
+    it('uses the standalone document path on Android', async () => {
         Platform.isDesktop = false;
         Platform.isMobile = true;
         Platform.isDesktopApp = false;
@@ -151,7 +139,7 @@ describe('openPrintModal', () => {
             ['invoice'],
             false
         );
-        expect(mocks.Printd).not.toHaveBeenCalled();
+        expect(mocks.openDesktopPrintDocument).not.toHaveBeenCalled();
     });
 
     it('opens the Electron debug preview on desktop when debug mode is enabled', async () => {
@@ -196,7 +184,7 @@ describe('openPrintModal', () => {
         expect(BrowserWindow).toHaveBeenCalledOnce();
         expect(loadURL).toHaveBeenCalledOnce();
         expect(openDevTools).toHaveBeenCalledOnce();
-        expect(mocks.launchPrint).toHaveBeenCalledOnce();
+        expect(mocks.openDesktopPrintDocument).toHaveBeenCalledOnce();
     });
 
     it('preserves canvas-rendered content in the printable clone', async () => {

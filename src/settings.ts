@@ -11,14 +11,99 @@ export class PrintSettingTab extends PluginSettingTab {
         this.plugin = plugin;
     }
 
+    /** Obsidian 1.13+ uses these definitions and indexes them for settings search. */
+    getSettingDefinitions() {
+        const normalizedSizeSettings = [
+            ['Font size', 'Set the body font size for normalized print output.', 'fontSize'],
+            ['Heading 1 size', 'Set the heading 1 size for normalized print output.', 'h1Size'],
+            ['Heading 2 size', 'Set the heading 2 size for normalized print output.', 'h2Size'],
+            ['Heading 3 size', 'Set the heading 3 size for normalized print output.', 'h3Size'],
+            ['Heading 4 size', 'Set the heading 4 size for normalized print output.', 'h4Size'],
+            ['Heading 5 size', 'Set the heading 5 size for normalized print output.', 'h5Size'],
+            ['Heading 6 size', 'Set the heading 6 size for normalized print output.', 'h6Size']
+        ].map(([name, desc, key]) => ({
+            name,
+            desc,
+            visible: () => this.plugin.settings.normalizeStyle,
+            control: { type: 'text', key }
+        }));
+
+        return [
+            {
+                name: 'Print note title',
+                desc: 'Include the note title in the printout.',
+                control: { type: 'toggle', key: 'printTitle' }
+            },
+            {
+                name: 'Print properties',
+                desc: 'Include the note properties at the top of the printout.',
+                control: { type: 'toggle', key: 'printFrontmatter' }
+            },
+            {
+                type: 'group',
+                heading: 'Styling',
+                items: [
+                    {
+                        name: 'Normalize style',
+                        desc: 'Use a neutral built-in print style instead of the active theme.',
+                        control: { type: 'toggle', key: 'normalizeStyle' }
+                    },
+                    ...normalizedSizeSettings,
+                    {
+                        name: 'Inherit note CSS classes',
+                        desc: 'Apply note CSS classes to the printed output.',
+                        control: { type: 'toggle', key: 'inheritNoteCssClasses' }
+                    }
+                ]
+            },
+            {
+                type: 'group',
+                heading: 'Layout',
+                items: [
+                    {
+                        name: 'Combine folder notes',
+                        desc: 'Print folder notes without a new page for each note.',
+                        control: { type: 'toggle', key: 'combineFolderNotes' }
+                    },
+                    {
+                        name: 'Treat horizontal lines as page breaks',
+                        desc: 'Start a new page at each horizontal line.',
+                        control: { type: 'toggle', key: 'hrPageBreaks' }
+                    }
+                ]
+            },
+            {
+                type: 'group',
+                heading: 'Advanced',
+                items: [
+                    {
+                        name: 'Custom CSS',
+                        desc: 'Enable print.css from Appearance > CSS snippets.',
+                        render: (setting: Setting) => {
+                            const hasPrintSnippet = getPrintSnippet(this.app);
+                            setting
+                                .addToggle(toggle => toggle
+                                    .setValue(hasPrintSnippet && isPrintSnippetEnabled(this.app))
+                                    .onChange((value) => setPrintSnippetEnabled(this.app, value)))
+                                .setDisabled(!hasPrintSnippet);
+                        }
+                    },
+                    {
+                        name: 'Debug mode',
+                        desc: 'Open the generated print document for inspection.',
+                        control: { type: 'toggle', key: 'debugMode' }
+                    }
+                ]
+            }
+        ];
+    }
+
     display(): void {
         const { containerEl } = this;
         const hasPrintSnippet = getPrintSnippet(this.app);
         const isPrintSnippetActive = hasPrintSnippet && isPrintSnippetEnabled(this.app);
 
         containerEl.empty();
-
-        this.addSectionHeading(containerEl, 'Content');
 
         this.addToggleSetting(
             containerEl,
@@ -38,7 +123,7 @@ export class PrintSettingTab extends PluginSettingTab {
         this.addToggleSetting(
             containerEl,
             'Normalize style',
-            'Use a neutral built-in print style instead of carrying over the active Obsidian theme styling. Helpful when your theme is too decorative for printing.',
+            'Use a neutral built-in print style instead of the active theme.',
             'normalizeStyle',
             async () => this.display()
         );
@@ -65,8 +150,8 @@ export class PrintSettingTab extends PluginSettingTab {
 
         this.addToggleSetting(
             containerEl,
-            'Inherit note `cssclasses`',
-            'Apply Obsidian note `cssclasses` from frontmatter/properties to the printed output. For folder printing, each note keeps its own classes.',
+            'Inherit note CSS classes',
+            'Apply note CSS classes to the printed output.',
             'inheritNoteCssClasses'
         );
 
@@ -75,13 +160,13 @@ export class PrintSettingTab extends PluginSettingTab {
         this.addToggleSetting(
             containerEl,
             'Combine folder notes',
-            'When printing a folder, combine all notes into a single document. If disabled, each note will start on a new page.',
+            'Print folder notes without a new page for each note.',
             'combineFolderNotes'
         );
         this.addToggleSetting(
             containerEl,
             'Treat horizontal lines as page breaks',
-            'Enable this option to interpret horizontal lines (---) as page breaks.',
+            'Start a new page at each horizontal line.',
             'hrPageBreaks'
         );
 
@@ -89,25 +174,24 @@ export class PrintSettingTab extends PluginSettingTab {
 
         new Setting(containerEl)
             .setName('Custom CSS')
-            .setDesc('Enable a snippet named `print.css` from Appearance > CSS snippets. Use it for print-specific overrides wrapped in `@media print` or scoped to `.obsidian-print`.')
+            .setDesc('Enable print.css from Appearance > CSS snippets.')
             .addToggle(toggle => toggle
                 .setValue(isPrintSnippetActive)
-                .onChange(async (value) => {
+                .onChange((value) => {
                     setPrintSnippetEnabled(this.app, value);
-                    await this.plugin.saveSettings();
                 }))
             .setDisabled(!hasPrintSnippet);
 
         this.addToggleSetting(
             containerEl,
             'Debug mode',
-            'Enable debug mode. This will open the print window for inspection.',
+            'Open the generated print document for inspection.',
             'debugMode'
         );
     }
 
     private addSectionHeading(containerEl: HTMLElement, text: string): void {
-        containerEl.createEl('h3', { text });
+        new Setting(containerEl).setName(text).setHeading();
     }
 
     private addToggleSetting<K extends ToggleSettingKey>(

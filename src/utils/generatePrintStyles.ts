@@ -47,7 +47,7 @@ async function getPluginStyles(app: App, manifest: PluginManifest): Promise<stri
 
     try {
         return await app.vault.adapter.read(`${manifest.dir}/styles.css`);
-    } catch (error) {
+    } catch {
         new Notice('Default styling could not be located.');
         return '';
     }
@@ -78,7 +78,7 @@ function getSizeOverrideStyles(settings: PrintPluginSettings): string {
 }
 
 function getHorizontalRuleStyles(settings: PrintPluginSettings): string {
-    return `hr { page-break-before: ${settings.hrPageBreaks ? 'always' : 'auto'}; border-width: ${settings.hrPageBreaks ? '0' : 'revert-layer'}; }`;
+    return `hr { break-before: ${settings.hrPageBreaks ? 'page' : 'auto'}; border-width: ${settings.hrPageBreaks ? '0' : 'revert-layer'}; }`;
 }
 
 function getNormalizedPrintStyles(settings: PrintPluginSettings): string {
@@ -289,18 +289,18 @@ function getPropertiesStyles(settings: PrintPluginSettings): string {
     `;
 }
 
-function getPrintSnippetValue(app: App,): string | undefined {
-    const printCssPath = ".obsidian/snippets/print.css";
+function getPrintSnippetValue(app: App): string | undefined {
+    const printCssPath = `${app.vault.configDir}/snippets/print.css`;
     return getCustomCss(app).csscache.get(printCssPath);
 }
 
 
 export function isPrintSnippetEnabled(app: App): boolean {
-    return getCustomCss(app).enabledSnippets.has("print")
+    return getCustomCss(app).enabledSnippets.has('print');
 }
 
 export function getPrintSnippet(app: App): boolean {
-    return getCustomCss(app).snippets.contains("print");
+    return getCustomCss(app).snippets.contains('print');
 }
 
 function getCustomCss(app: App): CustomCssLike {

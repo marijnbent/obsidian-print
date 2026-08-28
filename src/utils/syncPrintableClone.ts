@@ -8,7 +8,7 @@ export function syncPrintableCloneState(sourceRoot: HTMLElement, targetRoot: HTM
             return;
         }
 
-        if (sourceElement instanceof HTMLCanvasElement && targetElement instanceof HTMLCanvasElement) {
+        if (sourceElement.instanceOf(HTMLCanvasElement) && targetElement.instanceOf(HTMLCanvasElement)) {
             replaceCanvasWithImage(sourceElement, targetElement);
         }
     });
@@ -16,11 +16,12 @@ export function syncPrintableCloneState(sourceRoot: HTMLElement, targetRoot: HTM
 
 function replaceCanvasWithImage(sourceCanvas: HTMLCanvasElement, targetCanvas: HTMLCanvasElement): void {
     const dataUrl = getCanvasDataUrl(sourceCanvas);
-    if (!dataUrl || !targetCanvas.parentNode) {
+    const targetParent = targetCanvas.parentElement;
+    if (!dataUrl || !targetParent) {
         return;
     }
 
-    const imageElement = targetCanvas.ownerDocument.createElement('img');
+    const imageElement = targetParent.createEl('img');
 
     Array.from(sourceCanvas.attributes).forEach((attribute) => {
         imageElement.setAttribute(attribute.name, attribute.value);
@@ -40,7 +41,7 @@ function replaceCanvasWithImage(sourceCanvas: HTMLCanvasElement, targetCanvas: H
         imageElement.height = sourceCanvas.height;
     }
 
-    targetCanvas.parentNode.replaceChild(imageElement, targetCanvas);
+    targetCanvas.replaceWith(imageElement);
 }
 
 function getCanvasDataUrl(canvas: HTMLCanvasElement): string | null {
@@ -50,7 +51,7 @@ function getCanvasDataUrl(canvas: HTMLCanvasElement): string | null {
 
     try {
         return canvas.toDataURL();
-    } catch (error) {
+    } catch {
         return null;
     }
 }

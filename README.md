@@ -55,7 +55,7 @@ If you print often, you probably want to add a shortcut to one or more print com
 
 In the settings, you can optionally hide the title, and when **Normalize style** is enabled you can also adjust the font size for body text and headings.
 
-To further customize the appearance of your printed notes, you can create a `print.css` snippet in `.obsidian/snippets` and enable it from the plugin settings once Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. Print output uses a 12 mm page margin by default. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
+To further customize the appearance of your printed notes, create a CSS snippet named `print.css` in your vault's configured snippets folder. You can then enable it from the plugin settings after Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. Print output uses a 12 mm page margin by default. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
 If you have trouble with the styling, enable Debug Mode to open an inspection window for the generated print document.
 
@@ -65,3 +65,7 @@ The plugin supports Obsidian on iPhone, iPad, and Android.
 
 - **iOS and iPadOS**: The plugin generates an A4 PDF and shows a **Continue to print** button. Tap it to open the native share sheet, then select **Print**. Each PDF page is an image so Obsidian styles, local images, and characters stay intact. The text in the PDF is not selectable.
 - **Android**: The plugin saves a standalone HTML print document in the vault and opens it in your default browser. Use the browser menu to print it. Local images are included. The plugin reuses only files that it generated and does not replace your files.
+
+## Privacy and network use
+
+The plugin has no telemetry, accounts, or plugin-owned online service. It does not upload vault content. Printing can load remote images that are already embedded in a note. Those requests go to the image host. Local images are read through the Obsidian vault API and are included as local data in portable print documents.

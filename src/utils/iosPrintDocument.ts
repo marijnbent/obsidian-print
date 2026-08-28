@@ -63,7 +63,7 @@ class IosPrintModal extends Modal {
         this.contentEl.addClass('obsidian-print-ios-content');
         this.setTitle('Ready to print');
         this.contentEl.createEl('p', {
-            text: 'Open the iOS share sheet, then select Print.'
+            text: 'Open the iOS share sheet, then select print.'
         });
 
         const shareButton = this.contentEl.createEl('button', {
@@ -100,7 +100,7 @@ function canShareFile(file: File): boolean {
 
     try {
         return navigator.canShare({ files: [file] });
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -122,11 +122,17 @@ function isAbortError(error: unknown): boolean {
 }
 
 function createPrintFileName(title: string): string {
-    const safeTitle = title
-        .replace(/[\\/:*?"<>|\u0000-\u001f]/g, '-')
+    const safeTitle = replaceControlCharacters(title)
+        .replace(/[\\/:*?"<>|]/g, '-')
         .trim()
         .replace(/[. ]+$/, '')
         .slice(0, 100);
 
     return `${safeTitle || 'Obsidian print'}.pdf`;
+}
+
+function replaceControlCharacters(value: string): string {
+    return Array.from(value, (character) => (
+        character.charCodeAt(0) <= 0x1f ? '-' : character
+    )).join('');
 }

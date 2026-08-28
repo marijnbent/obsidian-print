@@ -110,7 +110,23 @@ export class MarkdownView {
     async save(): Promise<void> {}
 }
 
-export class Component {}
+export class Component {
+    unload(): void {}
+}
+
+export function sanitizeHTMLToDom(html: string): DocumentFragment {
+    const template = document.createElement('template');
+    template.innerHTML = html;
+    template.content.querySelectorAll('script').forEach((element) => element.remove());
+    template.content.querySelectorAll<HTMLElement>('*').forEach((element) => {
+        Array.from(element.attributes).forEach((attribute) => {
+            if (attribute.name.toLowerCase().startsWith('on')) {
+                element.removeAttribute(attribute.name);
+            }
+        });
+    });
+    return template.content;
+}
 
 export const MarkdownRenderer = {
     async render(
@@ -154,7 +170,7 @@ export async function loadMermaid(): Promise<{
 }> {
     return {
         render: async (id: string, source: string) => ({
-            svg: `<svg data-mermaid-id="${id}"><text>${source}</text></svg>`
+            svg: `<svg data-mermaid-id="${id}" onclick="alert(1)"><text>${source}</text><script>alert(1)</script></svg>`
         })
     };
 }

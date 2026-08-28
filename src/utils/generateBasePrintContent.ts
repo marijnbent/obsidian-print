@@ -1,15 +1,20 @@
-import type { BasesPropertyId, RenderContext, Value } from 'obsidian';
+type BasePropertyId = string;
+
+interface BaseValueLike {
+    renderTo?: (container: HTMLElement, context: { hoverPopover: null }) => void;
+    toString: () => string;
+}
 
 interface BaseEntryLike {
     file?: {
         basename?: string;
         path?: string;
     };
-    getValue?: (propertyId: BasesPropertyId) => Value | null;
+    getValue?: (propertyId: BasePropertyId) => BaseValueLike | null;
 }
 
 interface BaseEntryGroupLike {
-    key?: Value | null;
+    key?: BaseValueLike | null;
     entries?: BaseEntryLike[];
     hasKey?: () => boolean;
 }
@@ -17,12 +22,12 @@ interface BaseEntryGroupLike {
 interface BaseQueryResultLike {
     data?: BaseEntryLike[];
     groupedData?: BaseEntryGroupLike[];
-    properties?: BasesPropertyId[];
+    properties?: BasePropertyId[];
 }
 
 interface BaseViewConfigLike {
-    getOrder?: () => BasesPropertyId[];
-    getDisplayName?: (propertyId: BasesPropertyId) => string;
+    getOrder?: () => BasePropertyId[];
+    getDisplayName?: (propertyId: BasePropertyId) => string;
 }
 
 interface BaseDataViewLike {
@@ -71,7 +76,7 @@ export function generateBasePrintContent(
         content.createEl('h1', { text: options.title });
     }
 
-    const wrapper = document.createElement('div');
+    const wrapper = createDiv();
     wrapper.className = 'obsidian-print-note obsidian-print-view obsidian-print-base-view';
     wrapper.appendChild(createBaseTable(baseView, properties, groups));
     content.appendChild(wrapper);
@@ -107,9 +112,9 @@ function findBaseDataView(value: unknown, seen = new WeakSet<object>(), depth = 
 }
 
 function isBaseDataView(value: object): value is BaseDataViewLike {
-    const data = getObjectProperty(value, 'data') as BaseQueryResultLike | undefined;
-    const config = getObjectProperty(value, 'config') as BaseViewConfigLike | undefined;
-    if (!data || !config) {
+    const data = getObjectProperty(value, 'data');
+    const config = getObjectProperty(value, 'config');
+    if (!isRecord(data) || !isRecord(config)) {
         return false;
     }
 
@@ -117,13 +122,18 @@ function isBaseDataView(value: object): value is BaseDataViewLike {
     const groupedData = getObjectProperty(data, 'groupedData');
     const properties = getObjectProperty(data, 'properties');
 
-    return typeof config.getOrder === 'function'
-        && typeof config.getDisplayName === 'function'
+    const configuredOrder = safeCall(
+        getFunctionProperty(config, 'getOrder'),
+        config
+    );
+
+    return typeof getObjectProperty(config, 'getOrder') === 'function'
+        && typeof getObjectProperty(config, 'getDisplayName') === 'function'
         && (Array.isArray(entries) || Array.isArray(groupedData))
-        && (Array.isArray(properties) || Array.isArray(safeCall(config.getOrder, config)));
+        && (Array.isArray(properties) || Array.isArray(configuredOrder));
 }
 
-function getBaseProperties(baseView: BaseDataViewLike): BasesPropertyId[] {
+function getBaseProperties(baseView: BaseDataViewLike): BasePropertyId[] {
     const configuredOrder = safeCall(baseView.config?.getOrder, baseView.config);
     if (Array.isArray(configuredOrder) && configuredOrder.length > 0) {
         return configuredOrder;
@@ -131,18 +141,18 @@ function getBaseProperties(baseView: BaseDataViewLike): BasesPropertyId[] {
 
     const queryProperties = getObjectProperty(baseView.data, 'properties');
     if (Array.isArray(queryProperties)) {
-        return queryProperties;
+        return queryProperties.filter((value): value is string => typeof value === 'string');
     }
 
     return [];
 }
 
-function getBaseEntryGroups(baseView: BaseDataViewLike): Array<{ key: Value | null; entries: BaseEntryLike[]; hasKey: boolean }> {
+function getBaseEntryGroups(baseView: BaseDataViewLike): Array<{ key: BaseValueLike | null; entries: BaseEntryLike[]; hasKey: boolean }> {
     const groupedData = getObjectProperty(baseView.data, 'groupedData');
     if (Array.isArray(groupedData) && groupedData.length > 0) {
-        return groupedData.map((group) => ({
+        return groupedData.filter(isBaseEntryGroupLike).map((group) => ({
             key: group.key ?? null,
-            entries: Array.isArray(group.entries) ? group.entries : [],
+            entries: Array.isArray(group.entries) ? group.entries.filter(isBaseEntryLike) : [],
             hasKey: hasBaseGroupKey(group)
         }));
     }
@@ -150,23 +160,23 @@ function getBaseEntryGroups(baseView: BaseDataViewLike): Array<{ key: Value | nu
     const entries = getObjectProperty(baseView.data, 'data');
     return [{
         key: null,
-        entries: Array.isArray(entries) ? entries : [],
+        entries: Array.isArray(entries) ? entries.filter(isBaseEntryLike) : [],
         hasKey: false
     }];
 }
 
 function createBaseTable(
     baseView: BaseDataViewLike,
-    properties: BasesPropertyId[],
-    groups: Array<{ key: Value | null; entries: BaseEntryLike[]; hasKey: boolean }>
+    properties: BasePropertyId[],
+    groups: Array<{ key: BaseValueLike | null; entries: BaseEntryLike[]; hasKey: boolean }>
 ): HTMLTableElement {
-    const table = document.createElement('table');
+    const table = createEl('table');
     table.className = 'obsidian-print-base-table';
 
     const thead = table.createTHead();
     const headerRow = thead.insertRow();
     properties.forEach((propertyId) => {
-        const headerCell = document.createElement('th');
+        const headerCell = createEl('th');
         headerCell.textContent = getBasePropertyDisplayName(baseView, propertyId);
         headerRow.appendChild(headerCell);
     });
@@ -176,7 +186,7 @@ function createBaseTable(
         if (group.hasKey) {
             const groupRow = tbody.insertRow();
             groupRow.className = 'obsidian-print-base-group-row';
-            const groupCell = document.createElement('th');
+            const groupCell = createEl('th');
             groupCell.colSpan = properties.length;
             groupCell.textContent = getValueText(group.key);
             groupRow.appendChild(groupCell);
@@ -194,7 +204,7 @@ function createBaseTable(
     return table;
 }
 
-function renderBaseEntryValue(cell: HTMLTableCellElement, entry: BaseEntryLike, propertyId: BasesPropertyId): void {
+function renderBaseEntryValue(cell: HTMLTableCellElement, entry: BaseEntryLike, propertyId: BasePropertyId): void {
     const value = safeCall(entry.getValue, entry, propertyId);
     if (!value) {
         renderFallbackFileValue(cell, entry, propertyId);
@@ -203,11 +213,11 @@ function renderBaseEntryValue(cell: HTMLTableCellElement, entry: BaseEntryLike, 
 
     if (typeof value.renderTo === 'function') {
         try {
-            value.renderTo(cell, { hoverPopover: null } as RenderContext);
+            value.renderTo(cell, { hoverPopover: null });
             if (cell.childNodes.length > 0) {
                 return;
             }
-        } catch (error) {
+        } catch {
             cell.textContent = '';
         }
     }
@@ -215,7 +225,7 @@ function renderBaseEntryValue(cell: HTMLTableCellElement, entry: BaseEntryLike, 
     cell.textContent = getValueText(value);
 }
 
-function renderFallbackFileValue(cell: HTMLTableCellElement, entry: BaseEntryLike, propertyId: BasesPropertyId): void {
+function renderFallbackFileValue(cell: HTMLTableCellElement, entry: BaseEntryLike, propertyId: BasePropertyId): void {
     if (propertyId === 'file.name' && entry.file?.basename) {
         cell.textContent = entry.file.basename;
         return;
@@ -226,7 +236,7 @@ function renderFallbackFileValue(cell: HTMLTableCellElement, entry: BaseEntryLik
     }
 }
 
-function getBasePropertyDisplayName(baseView: BaseDataViewLike, propertyId: BasesPropertyId): string {
+function getBasePropertyDisplayName(baseView: BaseDataViewLike, propertyId: BasePropertyId): string {
     const displayName = safeCall(baseView.config?.getDisplayName, baseView.config, propertyId);
     if (typeof displayName === 'string' && displayName.trim().length > 0) {
         return displayName;
@@ -244,14 +254,14 @@ function hasBaseGroupKey(group: BaseEntryGroupLike): boolean {
     return Boolean(group.key && getValueText(group.key).trim().length > 0);
 }
 
-function getValueText(value: Value | null | undefined): string {
+function getValueText(value: BaseValueLike | null | undefined): string {
     if (!value) {
         return '';
     }
 
     try {
         return value.toString();
-    } catch (error) {
+    } catch {
         return '';
     }
 }
@@ -273,9 +283,14 @@ function getObjectProperty(value: unknown, propertyName: string): unknown {
 
     try {
         return (value as Record<string, unknown>)[propertyName];
-    } catch (error) {
+    } catch {
         return undefined;
     }
+}
+
+function getFunctionProperty(value: unknown, propertyName: string): (() => unknown) | undefined {
+    const property = getObjectProperty(value, propertyName);
+    return typeof property === 'function' ? property as () => unknown : undefined;
 }
 
 function safeCall<TArgs extends unknown[], TResult>(
@@ -289,7 +304,38 @@ function safeCall<TArgs extends unknown[], TResult>(
 
     try {
         return callback.apply(thisArg, args);
-    } catch (error) {
+    } catch {
         return undefined;
     }
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+function isBaseEntryLike(value: unknown): value is BaseEntryLike {
+    if (!isRecord(value)) {
+        return false;
+    }
+
+    const getValue = getObjectProperty(value, 'getValue');
+    return getValue === undefined || typeof getValue === 'function';
+}
+
+function isBaseEntryGroupLike(value: unknown): value is BaseEntryGroupLike {
+    if (!isRecord(value)) {
+        return false;
+    }
+
+    const key = getObjectProperty(value, 'key');
+    const entries = getObjectProperty(value, 'entries');
+    const hasKey = getObjectProperty(value, 'hasKey');
+
+    return (key === undefined || key === null || isBaseValueLike(key))
+        && (entries === undefined || Array.isArray(entries))
+        && (hasKey === undefined || typeof hasKey === 'function');
+}
+
+function isBaseValueLike(value: unknown): value is BaseValueLike {
+    return isRecord(value) && typeof getObjectProperty(value, 'toString') === 'function';
 }

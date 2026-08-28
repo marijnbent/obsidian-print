@@ -12,6 +12,7 @@
     "importHelpers": true,
     "isolatedModules": true,
     "strictNullChecks": true,
+    "strictBindCallApply": true,
     "lib": [
       "DOM",
       "ES5",

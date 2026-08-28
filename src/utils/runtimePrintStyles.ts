@@ -65,32 +65,28 @@ export function createStandalonePrintHtml(
     bodyClasses: string[] = [],
     includeAppClasses = true
 ): string {
-    const htmlElement = document.createElement('html');
+    const htmlElement = createEl('html');
     htmlElement.className = includeAppClasses
         ? toLightThemeClassName(document.documentElement.className)
         : '';
 
-    const headElement = document.createElement('head');
-    const metaElement = document.createElement('meta');
+    const headElement = createEl('head');
+    const metaElement = createEl('meta');
     metaElement.setAttribute('charset', 'utf-8');
     headElement.appendChild(metaElement);
 
-    const viewportElement = document.createElement('meta');
+    const viewportElement = createEl('meta');
     viewportElement.setAttribute('name', 'viewport');
     viewportElement.setAttribute('content', 'width=device-width, initial-scale=1');
     headElement.appendChild(viewportElement);
 
-    const titleElement = document.createElement('title');
+    const titleElement = createEl('title');
     titleElement.textContent = title;
     headElement.appendChild(titleElement);
 
-    const styleElement = document.createElement('style');
-    styleElement.textContent = cssText;
-    headElement.appendChild(styleElement);
-
     htmlElement.appendChild(headElement);
 
-    const bodyElement = document.createElement('body');
+    const bodyElement = createEl('body');
     applyRuntimePrintClassesToElement(bodyElement, includeAppClasses);
     if (bodyClasses.length > 0) {
         bodyElement.classList.add(...bodyClasses);
@@ -101,7 +97,20 @@ export function createStandalonePrintHtml(
 
     htmlElement.appendChild(bodyElement);
 
-    return `<!DOCTYPE html>${htmlElement.outerHTML}`;
+    const stylesheetHtml = cssText
+        ? `<link rel="stylesheet" href="${createCssDataUrl(cssText)}">`
+        : '';
+    const serializedHtml = htmlElement.outerHTML.replace(
+        '</head>',
+        `${stylesheetHtml}</head>`
+    );
+
+    return `<!DOCTYPE html>${serializedHtml}`;
+}
+
+/** Create a local stylesheet URL without adding a style element to the document. */
+export function createCssDataUrl(cssText: string): string {
+    return `data:text/css;charset=utf-8,${encodeURIComponent(cssText)}`;
 }
 
 function collectStyleSheetRules(
@@ -117,7 +126,7 @@ function collectStyleSheetRules(
 
     try {
         rules = cssSheet.cssRules;
-    } catch (error) {
+    } catch {
         return;
     }
 
@@ -140,8 +149,8 @@ function collectRuleList(
     selectorMatchContext?: SelectorMatchContext
 ): void {
     Array.from(rules).forEach((rule) => {
-        if (rule.type === CSSRule.STYLE_RULE) {
-            const styleRule = rule as CSSStyleRule;
+        if (rule instanceof CSSStyleRule) {
+            const styleRule = rule;
             if (!matchesTargetSelector(styleRule.selectorText, rootElement, selectorMatchContext)) {
                 return;
             }
@@ -151,8 +160,8 @@ function collectRuleList(
             return;
         }
 
-        if (rule.type === CSSRule.MEDIA_RULE) {
-            const mediaRule = rule as CSSMediaRule;
+        if (rule instanceof CSSMediaRule) {
+            const mediaRule = rule;
             const nestedRules: string[] = [];
 
             collectRuleList(
@@ -174,8 +183,8 @@ function collectRuleList(
             return;
         }
 
-        if (rule.type === CSSRule.IMPORT_RULE) {
-            const importRule = rule as CSSImportRule;
+        if (rule instanceof CSSImportRule) {
+            const importRule = rule;
             if (importRule.styleSheet) {
                 collectStyleSheetRules(
                     importRule.styleSheet,
@@ -235,7 +244,7 @@ function querySelectorAgainstRoot(selectorText: string, rootElement: ParentNode)
         }
 
         return Boolean(rootElement.querySelector(selectorText));
-    } catch (error) {
+    } catch {
         return false;
     }
 }
@@ -284,7 +293,7 @@ function querySelectorAgainstDocument(
         }
 
         return Boolean(match.closest(`[${MATCH_ROOT_ATTRIBUTE}]`));
-    } catch (error) {
+    } catch {
         return false;
     }
 }

@@ -129,7 +129,7 @@ describe('openIosPrintDocument', () => {
             expect.stringContaining('Quarterly report')
         );
         expect(mocks.createIosPdfDocument).toHaveBeenCalledWith(
-            expect.stringContaining('body { color: black; }')
+            expect.stringContaining('data:text/css;charset=utf-8,body%20%7B%20color%3A%20black%3B%20%7D')
         );
 
         insideClick = true;

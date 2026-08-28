@@ -1,4 +1,13 @@
-import { MarkdownRenderer, TFile, Component, Notice, App, loadMermaid, getFrontMatterInfo } from 'obsidian';
+import {
+    App,
+    Component,
+    getFrontMatterInfo,
+    loadMermaid,
+    MarkdownRenderer,
+    Notice,
+    sanitizeHTMLToDom,
+    TFile
+} from 'obsidian';
 import { createFrontmatterContent } from './frontmatterContent';
 
 /**
@@ -20,6 +29,8 @@ export async function generatePreviewContent(
         'obsidian-print-note',
         'markdown-rendered'
     );
+
+    const renderComponent = new Component();
 
     try {
         if (includeFrontmatter && input instanceof TFile) {
@@ -53,7 +64,7 @@ export async function generatePreviewContent(
             markdownContent,
             content,
             sourcePath,
-            new Component()
+            renderComponent
         );
 
         removeNativeMetadataContainers(content);
@@ -65,6 +76,8 @@ export async function generatePreviewContent(
         new Notice('Failed to generate preview content.');
         console.error('Preview generation error:', error);
         return;
+    } finally {
+        renderComponent.unload();
     }
 }
 
@@ -99,7 +112,10 @@ async function renderMermaidBlocks(content: HTMLElement): Promise<void> {
     }
 
     try {
-        const mermaid = await loadMermaid();
+        const mermaid: unknown = await loadMermaid();
+        if (!isMermaidRenderer(mermaid)) {
+            return;
+        }
 
         for (const codeElement of Array.from(mermaidCodeBlocks)) {
             const source = codeElement.textContent?.trim();
@@ -109,7 +125,7 @@ async function renderMermaidBlocks(content: HTMLElement): Promise<void> {
                 continue;
             }
 
-            const diagramContainer = document.createElement('div');
+            const diagramContainer = createDiv();
             diagramContainer.className = 'mermaid';
 
             const renderResult = await mermaid.render(
@@ -117,17 +133,15 @@ async function renderMermaidBlocks(content: HTMLElement): Promise<void> {
                 source
             );
 
-            const svg = typeof renderResult === 'string'
-                ? renderResult
-                : renderResult?.svg;
+            const svg = getMermaidSvg(renderResult);
 
             if (!svg) {
                 continue;
             }
 
-            diagramContainer.innerHTML = svg;
+            diagramContainer.appendChild(sanitizeHTMLToDom(svg));
 
-            if (typeof renderResult?.bindFunctions === 'function') {
+            if (isMermaidRenderResult(renderResult) && typeof renderResult.bindFunctions === 'function') {
                 renderResult.bindFunctions(diagramContainer);
             }
 
@@ -136,4 +150,35 @@ async function renderMermaidBlocks(content: HTMLElement): Promise<void> {
     } catch (error) {
         console.error('Mermaid rendering error:', error);
     }
+}
+
+interface MermaidRenderer {
+    render: (id: string, source: string) => Promise<unknown>;
+}
+
+interface MermaidRenderResult {
+    svg: string;
+    bindFunctions?: (element: HTMLElement) => void;
+}
+
+function isMermaidRenderer(value: unknown): value is MermaidRenderer {
+    return isRecord(value) && typeof value.render === 'function';
+}
+
+function isMermaidRenderResult(value: unknown): value is MermaidRenderResult {
+    return isRecord(value)
+        && typeof value.svg === 'string'
+        && (value.bindFunctions === undefined || typeof value.bindFunctions === 'function');
+}
+
+function getMermaidSvg(value: unknown): string | null {
+    if (typeof value === 'string') {
+        return value;
+    }
+
+    return isMermaidRenderResult(value) ? value.svg : null;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
 }

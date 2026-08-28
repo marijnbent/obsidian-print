@@ -1,17 +1,15 @@
 import { App, Platform } from 'obsidian';
 import { PrintPluginSettings } from '../types';
-import { Printd } from 'printd';
 import {
-    applyRuntimePrintClasses,
     createStandalonePrintHtml,
     getTargetedRuntimePrintCss
 } from './runtimePrintStyles';
 import { openDebugPrintPreview } from './printEnvironment';
-import { syncPrintableCloneState } from './syncPrintableClone';
 import { openAndroidPrintDocument } from './androidPrintDocument';
 import { openIosPrintDocument } from './iosPrintDocument';
+import { openDesktopPrintDocument } from './desktopPrintDocument';
 
-/** Print prepared content through Printd or a platform-specific mobile handoff. */
+/** Print prepared content through the platform-specific print flow. */
 export async function openPrintModal(
     app: App,
     title: string,
@@ -27,18 +25,6 @@ export async function openPrintModal(
     const combinedCssString = [cssString, runtimeCss]
         .filter((value) => value.trim().length > 0)
         .join('\n');
-    const previousTitle = document.title;
-    let restoredTitle = false;
-
-    const restoreDocumentTitle = () => {
-        if (restoredTitle) {
-            return;
-        }
-
-        restoredTitle = true;
-        document.title = previousTitle;
-    };
-
     if (settings.debugMode) {
         const debugContent = createStandalonePrintHtml(
             content,
@@ -75,33 +61,11 @@ export async function openPrintModal(
         return;
     }
 
-    const d = new Printd();
-    d.onBeforePrint(() => {
-        document.title = title;
-    });
-    d.onAfterPrint(() => {
-        restoreDocumentTitle();
-    });
-
-    d.print(content, [combinedCssString], undefined, ({ iframe, element, launchPrint }) => {
-        if (element instanceof HTMLElement) {
-            syncPrintableCloneState(content, element);
-        }
-
-        if (iframe.contentDocument) {
-            applyRuntimePrintClasses(iframe.contentDocument, includeThemeStyles);
-            iframe.contentDocument.title = title;
-
-            if (bodyClasses.length > 0) {
-                iframe.contentDocument.body.classList.add(...bodyClasses);
-            }
-        }
-
-        document.title = title;
-        launchPrint();
-
-        window.setTimeout(() => {
-            restoreDocumentTitle();
-        }, 1000);
-    });
+    await openDesktopPrintDocument(
+        title,
+        content,
+        combinedCssString,
+        bodyClasses,
+        includeThemeStyles
+    );
 }

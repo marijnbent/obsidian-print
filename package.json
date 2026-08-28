@@ -1,11 +1,12 @@
 {
 	"name": "obsidian-print-plugin",
-	"version": "0.5.9",
-	"description": "An Obsidian plugin for enhanced printing capabilities",
+	"version": "0.6.0",
+	"description": "Create clean printouts and PDFs from Obsidian notes and documents",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
+		"lint": "eslint src package.json",
 		"test": "vitest run",
 		"test:watch": "vitest",
 		"version": "node version-bump.mjs"
@@ -18,20 +19,21 @@
 	"author": "Marijn Bent",
 	"license": "MIT",
 	"devDependencies": {
+		"@eslint/js": "^9.39.5",
+		"@eslint/json": "^0.14.0",
 		"@types/node": "^24.12.2",
-		"@typescript-eslint/eslint-plugin": "^8.59.1",
-		"@typescript-eslint/parser": "^8.59.1",
-		"builtin-modules": "^3.3.0",
 		"esbuild": "^0.28.0",
+		"eslint": "^9.39.5",
+		"eslint-plugin-obsidianmd": "^0.4.2",
 		"jsdom": "^29.1.1",
 		"obsidian": "^1.12.3",
 		"tslib": "2.4.0",
 		"typescript": "^5.9.3",
+		"typescript-eslint": "^8.68.0",
 		"vitest": "^4.1.5"
 	},
 	"dependencies": {
 		"html2canvas-pro": "2.3.5",
-		"jspdf": "^4.2.1",
-		"printd": "^1.6.0"
+		"pdf-lib": "^1.17.1"
 	}
 }

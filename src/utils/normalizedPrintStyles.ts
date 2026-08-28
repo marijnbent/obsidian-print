@@ -56,7 +56,7 @@ export const NORMALIZED_PRINT_STYLES = `
     }
 
     .obsidian-print-page-break {
-        page-break-before: always;
+        break-before: page;
     }
 
     .callout {

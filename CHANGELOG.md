@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.1 - 2026-08-28
+
+- Fixed the desktop print dialog on Obsidian 1.13.
+- Removed hidden print frames after failures and canceled print jobs.
+
 ## 0.6.0 - 2026-08-28
 
 - Improved security and compatibility with Obsidian's plugin guidelines.

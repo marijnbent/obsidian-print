@@ -19,21 +19,6 @@ export async function openDesktopPrintDocument(
     frame.tabIndex = -1;
     document.body.appendChild(frame);
 
-    const frameDocument = frame.contentDocument;
-    const frameWindow = frame.contentWindow;
-    if (!frameDocument || !frameWindow) {
-        frame.remove();
-        throw new Error('Could not create the print document.');
-    }
-
-    populateDesktopPrintDocument(
-        frameDocument,
-        title,
-        content,
-        cssText,
-        bodyClasses,
-        includeAppClasses
-    );
     const previousTitle = document.title;
     let restoreTimer = 0;
     let cleanupTimer = 0;
@@ -54,12 +39,26 @@ export async function openDesktopPrintDocument(
         frame.remove();
     };
 
-    frameWindow.addEventListener('afterprint', cleanup, { once: true });
-    document.title = title;
-    restoreTimer = window.setTimeout(restoreTitle, TITLE_RESTORE_TIMEOUT_MS);
-    cleanupTimer = window.setTimeout(cleanup, FRAME_CLEANUP_TIMEOUT_MS);
-
     try {
+        const frameDocument = frame.contentDocument;
+        const frameWindow = frame.contentWindow;
+        if (!frameDocument || !frameWindow) {
+            throw new Error('Could not create the print document.');
+        }
+
+        populateDesktopPrintDocument(
+            frameDocument,
+            title,
+            content,
+            cssText,
+            bodyClasses,
+            includeAppClasses
+        );
+
+        frameWindow.addEventListener('afterprint', cleanup, { once: true });
+        document.title = title;
+        restoreTimer = window.setTimeout(restoreTitle, TITLE_RESTORE_TIMEOUT_MS);
+        cleanupTimer = window.setTimeout(cleanup, FRAME_CLEANUP_TIMEOUT_MS);
         frameWindow.print();
     } catch (error) {
         cleanup();
@@ -78,7 +77,8 @@ export function populateDesktopPrintDocument(
     doc.head.replaceChildren();
     doc.body.replaceChildren();
     doc.title = title;
-    doc.head.createEl('meta', { attr: { charset: 'utf-8' } });
+    const charsetMeta = createEl('meta', { attr: { charset: 'utf-8' } });
+    doc.head.appendChild(charsetMeta);
 
     if (cssText) {
         const StyleSheet = doc.defaultView?.CSSStyleSheet ?? CSSStyleSheet;

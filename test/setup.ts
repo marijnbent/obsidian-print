@@ -11,7 +11,19 @@ if (!globalWithCreateDiv.createDiv) {
 
 if (typeof globalThis.createEl !== 'function') {
     Object.defineProperty(globalThis, 'createEl', {
-        value: (tagName: string) => document.createElement(tagName)
+        value: (
+            tagName: string,
+            options?: { text?: string; attr?: Record<string, string> }
+        ) => {
+            const element = document.createElement(tagName);
+            if (options?.text) {
+                element.textContent = options.text;
+            }
+            Object.entries(options?.attr ?? {}).forEach(([name, value]) => {
+                element.setAttribute(name, value);
+            });
+            return element;
+        }
     });
 }
 

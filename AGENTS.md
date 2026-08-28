@@ -11,10 +11,11 @@ When preparing a release for this plugin:
 2. Bump `package.json`, `manifest.json`, and `versions.json`.
    You can use `npm run version -- <version>` for this repo.
 3. Run `npm test` and `npm run build`.
-4. Commit all release changes together.
-5. Push the branch to `origin`.
-6. Create an annotated git tag that matches the release version, for example `0.4.1`.
-7. Push the new tag to `origin`.
+4. Install the local build in the test vault, reload the plugin in Obsidian, and test the main print flow on a representative note.
+5. Commit all release changes together.
+6. Push the branch to `origin`.
+7. Create an annotated git tag that matches the release version, for example `0.4.1`.
+8. Push the new tag to `origin`.
 
 ## Notes
 

@@ -145,11 +145,6 @@
         margin-bottom: 0;
     }
 
-    .mermaid {
-        break-inside: avoid;
-        page-break-inside: avoid;
-    }
-
     .mermaid svg {
         display: block;
         max-width: 100%;

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.3 - 2026-08-29
+
+- Simplified iOS PDF byte handling.
+- Removed duplicate Mermaid print styles.
+
 ## 0.6.2 - 2026-08-29
 
 - Fixed long properties sections leaving a blank first page.

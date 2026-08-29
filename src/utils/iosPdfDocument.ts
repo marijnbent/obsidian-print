@@ -459,10 +459,7 @@ async function renderPageSlices(root: HTMLElement, slices: PdfPageSlice[]): Prom
     }
 
     const pdfBytes = await pdf.save({ useObjectStreams: true });
-    return pdfBytes.buffer.slice(
-        pdfBytes.byteOffset,
-        pdfBytes.byteOffset + pdfBytes.byteLength
-    ) as ArrayBuffer;
+    return pdfBytes.slice().buffer;
 }
 
 async function canvasToJpeg(canvas: HTMLCanvasElement): Promise<Uint8Array> {

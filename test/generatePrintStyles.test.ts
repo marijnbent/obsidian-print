@@ -83,6 +83,8 @@ describe('generatePrintStyles', () => {
         expect(themedCss).toContain('--obsidian-print-frontmatter-chip-background: var(--tag-background');
         expect(themedCss).toContain('--obsidian-print-frontmatter-background: var(--background-secondary');
         expect(themedCss).toContain('border-radius: 10px;');
+        expect(themedCss).toMatch(/\.obsidian-print-frontmatter-heading\s*\{[^}]*break-after: avoid;[^}]*page-break-after: avoid;/);
+        expect(themedCss).toMatch(/\.obsidian-print-frontmatter-properties\s*\{[^}]*break-inside: auto;[^}]*page-break-inside: auto;/);
         expect(normalizedCss).toContain('--obsidian-print-frontmatter-chip-background: #eef2ff;');
         expect(normalizedCss).toContain('--obsidian-print-frontmatter-background: #fcfcfd;');
         expect(normalizedCss).toContain('border-radius: 12px;');

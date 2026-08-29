@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.2 - 2026-08-29
+
+- Fixed long properties sections leaving a blank first page.
+
 ## 0.6.1 - 2026-08-28
 
 - Fixed the desktop print dialog on Obsidian 1.13.

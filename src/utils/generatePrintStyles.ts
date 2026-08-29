@@ -161,10 +161,14 @@ function getPropertiesStyles(settings: PrintPluginSettings): string {
             font-weight: 700;
             letter-spacing: 0.01em;
             text-transform: uppercase;
+            break-after: avoid;
+            page-break-after: avoid;
         }
         .obsidian-print-frontmatter-properties {
             display: grid;
             gap: 0.05rem;
+            break-inside: auto;
+            page-break-inside: auto;
         }
         .obsidian-print-frontmatter-property {
             display: grid;

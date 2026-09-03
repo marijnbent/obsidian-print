@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.4 - 2026-09-03
+
+- Added printing for multiple notes selected in the File Explorer.
+- Extended the combine-notes setting to selected notes.
+
 ## 0.6.3 - 2026-08-29
 
 - Simplified iOS PDF byte handling.

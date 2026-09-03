@@ -1,7 +1,7 @@
 {
 	"id": "print",
 	"name": "Print",
-	"version": "0.6.3",
+	"version": "0.6.4",
 	"isDesktopOnly": false,
 	"minAppVersion": "1.6.0",
 	"description": "Create clean printouts and PDFs from notes and documents.",

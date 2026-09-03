@@ -77,6 +77,25 @@ export default class PrintPlugin extends Plugin {
         );
 
         this.registerEvent(
+            this.app.workspace.on('files-menu', (menu, files) => {
+                const selectedNotes = files.filter(
+                    (file): file is TFile => file instanceof TFile && file.extension === 'md'
+                );
+
+                if (selectedNotes.length !== files.length || selectedNotes.length < 2) {
+                    return;
+                }
+
+                menu.addItem((item) => {
+                    item
+                        .setTitle('Print selected notes')
+                        .setIcon('printer')
+                        .onClick(async () => await this.printSelectedNotes(selectedNotes));
+                });
+            })
+        );
+
+        this.registerEvent(
             this.app.workspace.on('editor-menu', (menu) => {
                 menu.addItem((item) => {
                     item
@@ -119,6 +138,13 @@ export default class PrintPlugin extends Plugin {
         await this.openPrintableContent(printableSelection.title, printableSelection);
     }
 
+    async printSelectedNotes(files: TFile[]) {
+        await this.saveActiveFile();
+
+        const selectedNotesContent = await this.buildMultiNotePrintContent(files);
+        await this.openPrintableContent('Selected notes', { content: selectedNotesContent });
+    }
+
     async printFolder(folder?: TFolder) {
         if (!folder) {
             await this.saveActiveFile();
@@ -138,7 +164,7 @@ export default class PrintPlugin extends Plugin {
             return;
         }
 
-        const folderContent = await this.buildFolderPrintContent(files);
+        const folderContent = await this.buildMultiNotePrintContent(files);
         await this.openPrintableContent(activeFolder.name, { content: folderContent });
     }
 
@@ -227,8 +253,8 @@ export default class PrintPlugin extends Plugin {
         };
     }
 
-    private async buildFolderPrintContent(files: TFile[]): Promise<HTMLElement> {
-        const folderContent = createDiv();
+    private async buildMultiNotePrintContent(files: TFile[]): Promise<HTMLElement> {
+        const multiNoteContent = createDiv();
 
         for (const file of files) {
             const printableContent = await this.resolvePrintableMarkdownFileContent(file);
@@ -236,14 +262,14 @@ export default class PrintPlugin extends Plugin {
                 continue;
             }
 
-            if (!this.settings.combineFolderNotes) {
+            if (!this.settings.combineFolderNotes && multiNoteContent.childElementCount > 0) {
                 printableContent.content.addClass('obsidian-print-page-break');
             }
 
-            folderContent.append(printableContent.content);
+            multiNoteContent.append(printableContent.content);
         }
 
-        return folderContent;
+        return multiNoteContent;
     }
 
     private async openPrintableContent(

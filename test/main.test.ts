@@ -97,7 +97,30 @@ function getMockNotices(): string[] {
     return globalWithNoticeStore.__obsidianMockNotices;
 }
 
-describe('PrintPlugin cssclasses behavior', () => {
+function getWorkspaceEventHandler(app: ReturnType<typeof createApp>, eventName: string) {
+    return app.workspace.on.mock.calls.find(([name]: [string]) => name === eventName)?.[1];
+}
+
+function createMenuHarness() {
+    let click: (() => Promise<void>) | undefined;
+    const item: any = {};
+    item.setTitle = vi.fn(() => item);
+    item.setIcon = vi.fn(() => item);
+    item.onClick = vi.fn((handler) => {
+        click = handler;
+        return item;
+    });
+
+    return {
+        menu: {
+            addItem: vi.fn((configure) => configure(item))
+        },
+        item,
+        getClick: () => click
+    };
+}
+
+describe('PrintPlugin', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         getMockNotices().length = 0;
@@ -189,6 +212,97 @@ describe('PrintPlugin cssclasses behavior', () => {
             'body { color: black; }',
             ['invoice', 'compact-print']
         );
+    });
+
+    it('prints selected Markdown notes in the order supplied by the File Explorer', async () => {
+        const app = createApp();
+        const folder = createFolder('Notes');
+        const secondFile = createFile('Notes/two.md', 'two', folder);
+        const firstFile = createFile('Notes/one.md', 'one', folder);
+        const secondContent = document.createElement('div');
+        const firstContent = document.createElement('div');
+        const activeView = createMarkdownView(secondFile, '');
+        const menu = createMenuHarness();
+
+        app.workspace.getActiveViewOfType.mockReturnValue(activeView);
+        app.workspace.getActiveFile.mockReturnValue(secondFile);
+        mocks.generatePreviewContent.mockImplementation(async (file: TFile) => (
+            file === secondFile ? secondContent : firstContent
+        ));
+
+        const plugin = createPlugin(app);
+        await plugin.onload();
+
+        const filesMenuHandler = getWorkspaceEventHandler(app, 'files-menu');
+        filesMenuHandler(menu.menu, [secondFile, firstFile], 'file-explorer');
+
+        expect(menu.item.setTitle).toHaveBeenCalledWith('Print selected notes');
+        expect(menu.item.setIcon).toHaveBeenCalledWith('printer');
+
+        await menu.getClick()?.();
+
+        expect(activeView.save).toHaveBeenCalledOnce();
+        expect(mocks.generatePreviewContent.mock.calls.map(([file]) => file)).toEqual([
+            secondFile,
+            firstFile
+        ]);
+        expect(secondContent.classList.contains('obsidian-print-page-break')).toBe(false);
+        expect(firstContent.classList.contains('obsidian-print-page-break')).toBe(true);
+        expect(mocks.openPrintModal).toHaveBeenCalledWith(
+            app,
+            'Selected notes',
+            expect.any(HTMLDivElement),
+            plugin.settings,
+            'body { color: black; }'
+        );
+
+        const [, , printableContent] = mocks.openPrintModal.mock.calls[0];
+        expect(Array.from((printableContent as HTMLElement).children)).toEqual([
+            secondContent,
+            firstContent
+        ]);
+    });
+
+    it('does not offer selected-note printing for unsupported or mixed selections', async () => {
+        const app = createApp();
+        const folder = createFolder('Notes');
+        const note = createFile('Notes/note.md', 'note', folder);
+        const image = createFile('Notes/image.png', 'image', folder);
+        const menu = createMenuHarness();
+        const plugin = createPlugin(app);
+
+        await plugin.onload();
+
+        const filesMenuHandler = getWorkspaceEventHandler(app, 'files-menu');
+        filesMenuHandler(menu.menu, [note, image], 'file-explorer');
+        filesMenuHandler(menu.menu, [note, folder], 'file-explorer');
+        filesMenuHandler(menu.menu, [note], 'file-explorer');
+
+        expect(menu.menu.addItem).not.toHaveBeenCalled();
+    });
+
+    it('uses the existing combine setting for selected notes', async () => {
+        const app = createApp();
+        const folder = createFolder('Notes');
+        const firstFile = createFile('Notes/one.md', 'one', folder);
+        const secondFile = createFile('Notes/two.md', 'two', folder);
+        const firstContent = document.createElement('div');
+        const secondContent = document.createElement('div');
+
+        mocks.generatePreviewContent
+            .mockResolvedValueOnce(firstContent)
+            .mockResolvedValueOnce(secondContent);
+
+        const plugin = createPlugin(app);
+        plugin.settings = {
+            ...DEFAULT_SETTINGS,
+            combineFolderNotes: true
+        };
+
+        await plugin.printSelectedNotes([firstFile, secondFile]);
+
+        expect(firstContent.classList.contains('obsidian-print-page-break')).toBe(false);
+        expect(secondContent.classList.contains('obsidian-print-page-break')).toBe(false);
     });
 
     it('keeps each note classes on its own wrapper when printing a folder', async () => {

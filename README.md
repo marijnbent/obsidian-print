@@ -1,6 +1,6 @@
 # Print
 
-The Print plugin adds printing tools to your Obsidian workspace. You can print the current note, a text selection, or all notes in a folder from the command palette, the printer ribbon, or the context menu. If you like it or find it useful, please consider giving it a [star ![GitHub Repo stars](https://img.shields.io/github/stars/marijnbent/obsidian-print?style=social)](https://github.com/marijnbent/obsidian-print) on GitHub.
+The Print plugin adds printing tools to your Obsidian workspace. You can print the current note, a text selection, selected notes, or all notes in a folder from the command palette, the printer ribbon, or the context menu. If you like it or find it useful, please consider giving it a [star ![GitHub Repo stars](https://img.shields.io/github/stars/marijnbent/obsidian-print?style=social)](https://github.com/marijnbent/obsidian-print) on GitHub.
 
 https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 
@@ -10,6 +10,7 @@ https://github.com/user-attachments/assets/5882f08c-19e6-46da-b808-608b95376979
 
 - **Print the current note**: Trigger printing from the command palette, the printer ribbon, or by right-clicking a note.
 - **Print a selection**: Print only the selected text from the active editor.
+- **Print selected notes**: Select multiple Markdown notes in the File Explorer, then right-click to print them together.
 - **Print all notes in a folder**: Right-click on a folder or use the command palette to print all markdown notes in that folder.
 - **Print on desktop and mobile**: Use the system print dialog on desktop, generate an A4 PDF on iOS, or open a standalone print document in your Android browser.
 
@@ -42,7 +43,7 @@ If you print often, you probably want to add a shortcut to one or more print com
 - **Print note title**: Include the note title in the printout.
 - **Print properties**: Include note properties/frontmatter at the top of the printed note.
 - **Font size and heading sizes**: Adjust body text and heading sizes when **Normalize style** is enabled.
-- **Combine folder notes**: Remove page breaks between notes when printing all notes from a folder.
+- **Combine multiple notes**: Remove page breaks between notes when printing selected notes or all notes from a folder.
 - **Treat horizontal lines as page breaks**: Interpret `---` separators as print page breaks.
 - **Debug mode**: Open a separate inspection window with the generated HTML and CSS so you can troubleshoot styling issues.
 - **Inherit note `cssclasses`**: Apply Obsidian note `cssclasses` to printed output so note-specific print CSS can carry over.

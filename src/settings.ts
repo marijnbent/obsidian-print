@@ -61,8 +61,8 @@ export class PrintSettingTab extends PluginSettingTab {
                 heading: 'Layout',
                 items: [
                     {
-                        name: 'Combine folder notes',
-                        desc: 'Print folder notes without a new page for each note.',
+                        name: 'Combine multiple notes',
+                        desc: 'Print folder notes and selected notes without starting each note on a new page.',
                         control: { type: 'toggle', key: 'combineFolderNotes' }
                     },
                     {
@@ -159,8 +159,8 @@ export class PrintSettingTab extends PluginSettingTab {
 
         this.addToggleSetting(
             containerEl,
-            'Combine folder notes',
-            'Print folder notes without a new page for each note.',
+            'Combine multiple notes',
+            'Print folder notes and selected notes without starting each note on a new page.',
             'combineFolderNotes'
         );
         this.addToggleSetting(

@@ -1,6 +1,6 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import { App, FileSystemAdapter, Notice, Platform, PluginSettingTab, Setting } from 'obsidian';
 import PrintPlugin from './main';
-import { getPrintSnippet, isPrintSnippetEnabled, setPrintSnippetEnabled } from './utils/generatePrintStyles';
+import { getPrintSnippet, getPrintSnippetPath, isPrintSnippetEnabled, setPrintSnippetEnabled } from './utils/generatePrintStyles';
 import { PrintPluginSettings } from './types';
 
 export class PrintSettingTab extends PluginSettingTab {
@@ -78,15 +78,8 @@ export class PrintSettingTab extends PluginSettingTab {
                 items: [
                     {
                         name: 'Custom CSS',
-                        desc: 'Enable print.css from Appearance > CSS snippets.',
-                        render: (setting: Setting) => {
-                            const hasPrintSnippet = getPrintSnippet(this.app);
-                            setting
-                                .addToggle(toggle => toggle
-                                    .setValue(hasPrintSnippet && isPrintSnippetEnabled(this.app))
-                                    .onChange((value) => setPrintSnippetEnabled(this.app, value)))
-                                .setDisabled(!hasPrintSnippet);
-                        }
+                        desc: 'Use print.css from your CSS snippets folder. This switch also controls the snippet under Appearance.',
+                        render: (setting: Setting) => this.renderCustomCssSetting(setting)
                     },
                     {
                         name: 'Debug mode',
@@ -100,8 +93,6 @@ export class PrintSettingTab extends PluginSettingTab {
 
     display(): void {
         const { containerEl } = this;
-        const hasPrintSnippet = getPrintSnippet(this.app);
-        const isPrintSnippetActive = hasPrintSnippet && isPrintSnippetEnabled(this.app);
 
         containerEl.empty();
 
@@ -172,15 +163,7 @@ export class PrintSettingTab extends PluginSettingTab {
 
         this.addSectionHeading(containerEl, 'Advanced');
 
-        new Setting(containerEl)
-            .setName('Custom CSS')
-            .setDesc('Enable print.css from Appearance > CSS snippets.')
-            .addToggle(toggle => toggle
-                .setValue(isPrintSnippetActive)
-                .onChange((value) => {
-                    setPrintSnippetEnabled(this.app, value);
-                }))
-            .setDisabled(!hasPrintSnippet);
+        this.renderCustomCssSetting(new Setting(containerEl).setName('Custom CSS'));
 
         this.addToggleSetting(
             containerEl,
@@ -188,6 +171,66 @@ export class PrintSettingTab extends PluginSettingTab {
             'Open the generated print document for inspection.',
             'debugMode'
         );
+    }
+
+    private renderCustomCssSetting(setting: Setting): void {
+        const path = getPrintSnippetPath(this.app);
+        const description = `Edit ${path}. This switch also controls the snippet under Appearance > CSS snippets. Changes apply on the next print.`;
+        const refreshDescription = async (): Promise<boolean> => {
+            try {
+                const exists = await getPrintSnippet(this.app);
+                let message = '';
+                if (!exists) {
+                    message = await this.app.vault.adapter.exists(`${path}.css`)
+                        ? ' Found print.css.css. Rename it to print.css; Windows may hide the final extension.'
+                        : ' File not found. Create print.css in this folder, then enable this switch.';
+                }
+                setting.setDesc(description + message);
+                return exists;
+            } catch {
+                setting.setDesc(`${description} Could not check the file. Check that the snippets folder is accessible.`);
+                return false;
+            }
+        };
+
+        setting.setDesc(description).addToggle(toggle => toggle
+            .setValue(isPrintSnippetEnabled(this.app))
+            .onChange(async (value) => {
+                toggle.setDisabled(true);
+                try {
+                    if (!value || await refreshDescription()) {
+                        setPrintSnippetEnabled(this.app, value);
+                    }
+                } finally {
+                    toggle.setValue(isPrintSnippetEnabled(this.app));
+                    toggle.setDisabled(false);
+                }
+            }));
+
+        if (Platform.isDesktopApp && this.app.vault.adapter instanceof FileSystemAdapter) {
+            setting.addExtraButton(button => button
+                .setIcon('folder-open')
+                .setTooltip('Open snippets folder')
+                .onClick(async () => {
+                    const adapter = this.app.vault.adapter;
+                    if (!(adapter instanceof FileSystemAdapter)) return;
+                    try {
+                        const folder = `${this.app.vault.configDir}/snippets`;
+                        if (!await adapter.exists(folder)) {
+                            await adapter.mkdir(folder);
+                        }
+                        const electron = (window as Window & {
+                            require: (name: string) => { shell: { openPath: (path: string) => Promise<string> } };
+                        }).require('electron');
+                        const error = await electron.shell.openPath(adapter.getFullPath(folder));
+                        if (error) throw new Error(error);
+                    } catch {
+                        new Notice('Could not open the snippets folder. Use the folder button in your CSS snippet settings.');
+                    }
+                }));
+        }
+
+        void refreshDescription();
     }
 
     private addSectionHeading(containerEl: HTMLElement, text: string): void {

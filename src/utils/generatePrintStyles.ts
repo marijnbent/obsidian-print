@@ -1,13 +1,9 @@
-import { App, Notice, PluginManifest } from "obsidian";
+import { App, Notice, PluginManifest, normalizePath } from "obsidian";
 import { PrintPluginSettings } from "src/types";
 import { NORMALIZED_PRINT_STYLES } from "./normalizedPrintStyles";
 
 interface CustomCssLike {
-    csscache: Map<string, string>;
     enabledSnippets: Set<string>;
-    snippets: {
-        contains: (name: string) => boolean;
-    };
     setCssEnabledStatus: (name: string, enabled: boolean) => void;
 }
 
@@ -27,7 +23,7 @@ export async function generatePrintStyles(app: App, manifest: PluginManifest, se
         await getPluginStyles(app, manifest),
         getNormalizedPrintStyles(settings),
         getPropertiesStyles(settings),
-        getUserSnippetStyles(app)
+        await getUserSnippetStyles(app)
     ];
 
     return cssSections
@@ -53,12 +49,22 @@ async function getPluginStyles(app: App, manifest: PluginManifest): Promise<stri
     }
 }
 
-function getUserSnippetStyles(app: App): string {
-    if (!getPrintSnippet(app) || !isPrintSnippetEnabled(app)) {
+async function getUserSnippetStyles(app: App): Promise<string> {
+    if (!isPrintSnippetEnabled(app)) {
         return '';
     }
 
-    return getPrintSnippetValue(app) ?? '';
+    const path = getPrintSnippetPath(app);
+    try {
+        if (!await getPrintSnippet(app)) {
+            new Notice(`Custom print CSS was not found: ${path}. Printing without custom CSS.`);
+            return '';
+        }
+        return await app.vault.adapter.read(path);
+    } catch {
+        new Notice(`Could not read custom print CSS: ${path}. Printing without custom CSS.`);
+        return '';
+    }
 }
 
 function getSizeOverrideStyles(settings: PrintPluginSettings): string {
@@ -293,9 +299,8 @@ function getPropertiesStyles(settings: PrintPluginSettings): string {
     `;
 }
 
-function getPrintSnippetValue(app: App): string | undefined {
-    const printCssPath = `${app.vault.configDir}/snippets/print.css`;
-    return getCustomCss(app).csscache.get(printCssPath);
+export function getPrintSnippetPath(app: App): string {
+    return normalizePath(`${app.vault.configDir}/snippets/print.css`);
 }
 
 
@@ -303,8 +308,8 @@ export function isPrintSnippetEnabled(app: App): boolean {
     return getCustomCss(app).enabledSnippets.has('print');
 }
 
-export function getPrintSnippet(app: App): boolean {
-    return getCustomCss(app).snippets.contains('print');
+export function getPrintSnippet(app: App): Promise<boolean> {
+    return app.vault.adapter.exists(getPrintSnippetPath(app));
 }
 
 function getCustomCss(app: App): CustomCssLike {

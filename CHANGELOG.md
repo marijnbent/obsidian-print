@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.6.5 - 2026-09-05
+
+- Load custom print CSS directly from the file on each print.
+- Add a snippets-folder button and clearer custom CSS setup guidance.
+- Explain missing CSS files and doubled file extensions.
+
 ## 0.6.4 - 2026-09-03
 
 - Added printing for multiple notes selected in the File Explorer.

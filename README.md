@@ -48,7 +48,7 @@ If you print often, you probably want to add a shortcut to one or more print com
 - **Debug mode**: Open a separate inspection window with the generated HTML and CSS so you can troubleshoot styling issues.
 - **Inherit note `cssclasses`**: Apply Obsidian note `cssclasses` to printed output so note-specific print CSS can carry over.
 - **Normalize style**: Use a neutral built-in print style instead of carrying over the active Obsidian theme styling.
-- **Custom CSS**: In Advanced settings, enable a `print.css` snippet from Obsidian's CSS snippets folder when available.
+- **Custom CSS**: Enable `print.css` from your CSS snippets folder. The switch is shared with Appearance → CSS snippets.
 
 ![image](https://github.com/user-attachments/assets/2ffed185-cc8f-43d9-8444-7cb9657d61f7)
 
@@ -56,7 +56,15 @@ If you print often, you probably want to add a shortcut to one or more print com
 
 In the settings, you can optionally hide the title, and when **Normalize style** is enabled you can also adjust the font size for body text and headings.
 
-To further customize the appearance of your printed notes, create a CSS snippet named `print.css` in your vault's configured snippets folder. You can then enable it from the plugin settings after Obsidian detects it. The printed document's body contains the `obsidian-print` class. Be sure to either wrap your CSS in `@media print` or prefix your print-specific CSS with `.obsidian-print` so it only applies to printed content. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. Print output uses a 12 mm page margin by default. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
+To further customize your printouts:
+
+1. Open **Print → Advanced → Custom CSS**. On desktop, use the **Open snippets folder** button beside the switch. You can also find the folder button under **Appearance → CSS snippets**.
+2. Create or edit `print.css` in that folder. The default path is `.obsidian/snippets/print.css`; Print shows the correct path if your configuration folder has another name.
+3. Enable **Custom CSS** in Print, or enable the `print` snippet under Appearance. Both switches control the same state. Existing enabled snippets continue to work.
+
+Print reads the file again for each print, so saved edits apply to the next printout. If the file is missing, Print settings show how to fix it. On Windows, show file name extensions and check that the file is named `print.css`, not `print.css.css`. Obsidian lists a correctly named file as `print`.
+
+The printed document's body contains the `obsidian-print` class. Wrap print-specific CSS in `@media print` or prefix it with `.obsidian-print` so it does not affect normal notes when the snippet is enabled in Obsidian. If you enable **Inherit note `cssclasses`**, note-level Obsidian classes will be available in the printed output as well. Theme styles for code blocks and MathJax are also carried into the print document when needed, unless you enable **Normalize style** to use the plugin's neutral fallback styling instead. Print output uses a 12 mm page margin by default. You can view the default styles [in this file](/styles.css). Every individual note contains the `obsidian-print-note` class.
 
 If you have trouble with the styling, enable Debug Mode to open an inspection window for the generated print document.
 

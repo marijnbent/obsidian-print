@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { DEFAULT_SETTINGS } from '../src/types';
 import { generatePrintStyles } from '../src/utils/generatePrintStyles';
 
@@ -11,11 +11,7 @@ describe('generatePrintStyles', () => {
                 }
             },
             customCss: {
-                enabledSnippets: new Set<string>(),
-                snippets: {
-                    contains: () => false
-                },
-                csscache: new Map<string, string>()
+                enabledSnippets: new Set<string>()
             }
         };
 
@@ -53,11 +49,7 @@ describe('generatePrintStyles', () => {
                 }
             },
             customCss: {
-                enabledSnippets: new Set<string>(),
-                snippets: {
-                    contains: () => false
-                },
-                csscache: new Map<string, string>()
+                enabledSnippets: new Set<string>()
             }
         };
 
@@ -88,5 +80,51 @@ describe('generatePrintStyles', () => {
         expect(normalizedCss).toContain('--obsidian-print-frontmatter-chip-background: #eef2ff;');
         expect(normalizedCss).toContain('--obsidian-print-frontmatter-background: #fcfcfd;');
         expect(normalizedCss).toContain('border-radius: 12px;');
+    });
+    it.each(['.obsidian', '.custom-config'])('reads fresh custom CSS last and respects the shared switch in %s', async (configDir) => {
+        let snippet = '.obsidian-print p { text-indent: 2em; }';
+        const path = `${configDir}/snippets/print.css`;
+        const read = vi.fn(async (file: string) => file === path ? snippet : 'body { color: black; }');
+        const app = {
+            vault: { configDir, adapter: { read, exists: vi.fn(async () => true) } },
+            customCss: { enabledSnippets: new Set(['print']) }
+        };
+        const generate = () => generatePrintStyles(app as never, { dir: 'test-plugin' } as never, DEFAULT_SETTINGS);
+
+        expect((await generate()).endsWith(snippet)).toBe(true);
+        snippet = '.obsidian-print p { text-indent: 3em; }';
+        expect((await generate()).endsWith(snippet)).toBe(true);
+        expect(read.mock.calls.filter(([file]) => file === path)).toHaveLength(2);
+
+        app.customCss.enabledSnippets.delete('print');
+        read.mockClear();
+        expect(await generate()).not.toContain(snippet);
+        expect(read).not.toHaveBeenCalledWith(path);
+    });
+
+    it.each(['missing', 'unreadable'])('continues with default styles and a notice for an enabled %s snippet', async (failure) => {
+        const app = {
+            vault: {
+                configDir: '.obsidian',
+                adapter: {
+                    exists: async () => failure !== 'missing',
+                    read: async (path: string) => {
+                        if (path.endsWith('/print.css')) throw new Error('Permission denied');
+                        return 'body { color: black; }';
+                    }
+                }
+            },
+            customCss: { enabledSnippets: new Set(['print']) }
+        };
+        const notices = (globalThis as typeof globalThis & { __obsidianMockNotices?: string[] });
+        notices.__obsidianMockNotices = [];
+        const css = await generatePrintStyles(app as never, { dir: 'test-plugin' } as never, DEFAULT_SETTINGS);
+
+        expect(css).toContain('body { color: black; }');
+        expect(notices.__obsidianMockNotices).toEqual([
+            failure === 'missing'
+                ? 'Custom print CSS was not found: .obsidian/snippets/print.css. Printing without custom CSS.'
+                : 'Could not read custom print CSS: .obsidian/snippets/print.css. Printing without custom CSS.'
+        ]);
     });
 });

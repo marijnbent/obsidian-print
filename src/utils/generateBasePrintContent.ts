@@ -23,14 +23,18 @@ interface BaseQueryResultLike {
     data?: BaseEntryLike[];
     groupedData?: BaseEntryGroupLike[];
     properties?: BasePropertyId[];
+    getSummaryValue?: (controller: object, entries: BaseEntryLike[], propertyId: BasePropertyId, summaryKey: string) => BaseValueLike | null;
 }
 
 interface BaseViewConfigLike {
+    groupBy?: unknown;
+    getSummaryKey?: (propertyId: BasePropertyId) => string | null;
     getOrder?: () => BasePropertyId[];
     getDisplayName?: (propertyId: BasePropertyId) => string;
 }
 
 interface BaseDataViewLike {
+    queryController?: object;
     config?: BaseViewConfigLike;
     data?: BaseQueryResultLike;
 }
@@ -182,14 +186,40 @@ function createBaseTable(
     });
 
     const tbody = table.createTBody();
+    const isGrouped = Boolean(baseView.config?.groupBy) || groups.some((group) => group.hasKey);
+    const summaryKeys = properties.map((propertyId) => safeCall(baseView.config?.getSummaryKey, baseView.config, propertyId));
+    const addSummaryRow = (entries: BaseEntryLike[]) => {
+        const controller = baseView.queryController;
+        if (!controller || !baseView.data?.getSummaryValue || !summaryKeys.some((key) => key)) {
+            return;
+        }
+
+        const row = tbody.insertRow();
+        row.className = 'obsidian-print-base-summary-row';
+        properties.forEach((propertyId, index) => {
+            const cell = row.insertCell();
+            const summaryKey = summaryKeys[index];
+            if (!summaryKey) {
+                return;
+            }
+
+            const value = safeCall(baseView.data?.getSummaryValue, baseView.data, controller, entries, propertyId, summaryKey);
+            cell.createDiv().textContent = summaryKey;
+            renderBaseValue(cell.createDiv(), value);
+        });
+    };
     groups.forEach((group) => {
         if (group.hasKey) {
             const groupRow = tbody.insertRow();
             groupRow.className = 'obsidian-print-base-group-row';
             const groupCell = createEl('th');
             groupCell.colSpan = properties.length;
-            groupCell.textContent = getValueText(group.key);
+            renderBaseValue(groupCell, group.key);
             groupRow.appendChild(groupCell);
+        }
+
+        if (isGrouped) {
+            addSummaryRow(group.entries);
         }
 
         group.entries.forEach((entry) => {
@@ -199,6 +229,9 @@ function createBaseTable(
                 renderBaseEntryValue(cell, entry, propertyId);
             });
         });
+        if (!isGrouped) {
+            addSummaryRow(group.entries);
+        }
     });
 
     return table;
@@ -208,6 +241,14 @@ function renderBaseEntryValue(cell: HTMLTableCellElement, entry: BaseEntryLike, 
     const value = safeCall(entry.getValue, entry, propertyId);
     if (!value) {
         renderFallbackFileValue(cell, entry, propertyId);
+        return;
+    }
+
+    renderBaseValue(cell, value);
+}
+
+function renderBaseValue(cell: HTMLElement, value: BaseValueLike | null | undefined): void {
+    if (!value) {
         return;
     }
 

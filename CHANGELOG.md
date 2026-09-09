@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.6.6 - 2026-09-09
+
+- Include configured summaries when printing Bases tables.
+- Render linked Bases group names without raw wiki-link markup.
+
 ## 0.6.5 - 2026-09-05
 
 - Load custom print CSS directly from the file on each print.

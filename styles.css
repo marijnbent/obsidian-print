@@ -86,7 +86,8 @@
         font-weight: 600;
     }
 
-    .obsidian-print-base-group-row th {
+    .obsidian-print-base-group-row th,
+    .obsidian-print-base-summary-row td {
         background: var(--background-primary-alt, #f8f8f8);
         color: var(--text-muted, #4b5563);
         font-weight: 600;

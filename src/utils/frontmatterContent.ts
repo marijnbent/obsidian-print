@@ -39,7 +39,7 @@ export function createFrontmatterContent(file: TFile, app: App): HTMLElement | n
 
         const valueElement = createDiv();
         valueElement.className = 'obsidian-print-frontmatter-value';
-        appendFrontmatterValue(valueElement, value);
+        appendFrontmatterValue(valueElement, value, file, app);
 
         propertyElement.append(keyElement, valueElement);
         metadataProperties.appendChild(propertyElement);
@@ -48,7 +48,7 @@ export function createFrontmatterContent(file: TFile, app: App): HTMLElement | n
     return metadataContainer;
 }
 
-function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
+function appendFrontmatterValue(container: HTMLElement, value: unknown, file: TFile, app: App): void {
     if (typeof value === 'boolean') {
         const booleanElement = createSpan();
         booleanElement.className = 'obsidian-print-frontmatter-boolean';
@@ -71,7 +71,7 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
     }
 
     if (typeof value === 'string' || typeof value === 'number') {
-        container.appendChild(createInlineValueElement(value));
+        container.appendChild(createInlineValueElement(value, file, app));
         return;
     }
 
@@ -89,7 +89,7 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
             entries.forEach((entry) => {
                 const chipElement = createSpan();
                 chipElement.className = 'obsidian-print-frontmatter-chip';
-                chipElement.appendChild(createInlineValueElement(entry));
+                chipElement.appendChild(createInlineValueElement(entry, file, app));
                 chipList.appendChild(chipElement);
             });
 
@@ -98,7 +98,7 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
         }
 
         if (entries.length === 1) {
-            appendFrontmatterValue(container, entries[0]);
+            appendFrontmatterValue(container, entries[0], file, app);
             return;
         }
 
@@ -107,7 +107,7 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
 
         entries.forEach((entry) => {
             const listItem = createEl('li');
-            appendFrontmatterValue(listItem, entry);
+            appendFrontmatterValue(listItem, entry, file, app);
             listElement.appendChild(listItem);
         });
 
@@ -136,7 +136,7 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
 
             const valueElement = createEl('dd');
             valueElement.className = 'obsidian-print-frontmatter-object-value';
-            appendFrontmatterValue(valueElement, entry);
+            appendFrontmatterValue(valueElement, entry, file, app);
 
             rowElement.append(keyElement, valueElement);
             objectElement.appendChild(rowElement);
@@ -148,10 +148,10 @@ function appendFrontmatterValue(container: HTMLElement, value: unknown): void {
 
 }
 
-function createInlineValueElement(value: string | number | boolean): HTMLElement {
+function createInlineValueElement(value: string | number | boolean, file: TFile, app: App): HTMLElement {
     if (typeof value === 'boolean') {
         const booleanWrapper = createSpan();
-        appendFrontmatterValue(booleanWrapper, value);
+        appendFrontmatterValue(booleanWrapper, value, file, app);
         return booleanWrapper;
     }
 
@@ -165,7 +165,32 @@ function createInlineValueElement(value: string | number | boolean): HTMLElement
 
     const textElement = createSpan();
     textElement.className = 'obsidian-print-frontmatter-text';
-    textElement.textContent = String(value);
+    const text = String(value);
+    let offset = 0;
+
+    for (const match of text.matchAll(/\[\[([^[\]|\r\n]+)(?:\|([^[\]\r\n]*))?\]\]/g)) {
+        const target = match[1].trim();
+        if (!target) {
+            continue;
+        }
+
+        const headingIndex = target.indexOf('#');
+        const linkpath = headingIndex < 0 ? target : target.slice(0, headingIndex);
+        const subpath = headingIndex < 0 ? '' : target.slice(headingIndex);
+        const destination = linkpath
+            ? app.metadataCache.getFirstLinkpathDest(linkpath, file.path)?.path ?? linkpath
+            : file.path;
+
+        const linkElement = createEl('a');
+        linkElement.className = 'obsidian-print-frontmatter-link';
+        linkElement.href = `obsidian://open?vault=${encodeURIComponent(app.vault.getName())}&file=${encodeURIComponent(destination + subpath)}`;
+        linkElement.textContent = match[2] || target;
+
+        textElement.append(text.slice(offset, match.index), linkElement);
+        offset = match.index + match[0].length;
+    }
+
+    textElement.append(text.slice(offset));
     return textElement;
 }
 

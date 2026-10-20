@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.7 - 2026-10-20
+
+- Render frontmatter wiki-links with readable labels and Obsidian links.
+
 ## 0.6.6 - 2026-09-09
 
 - Include configured summaries when printing Bases tables.

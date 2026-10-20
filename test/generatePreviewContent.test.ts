@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { TFile } from 'obsidian';
 import { generatePreviewContent } from '../src/utils/generatePreviewContent';
 
@@ -87,6 +87,81 @@ flowchart TD
         expect(content?.querySelector('script')).toBeNull();
         expect(content?.textContent).toContain('Start --> Finish');
         expect(content?.querySelector('pre code.language-mermaid')).toBeFalsy();
+    });
+
+    it('renders frontmatter wikilinks in text, lists, and nested objects', async () => {
+        const file = createFile();
+        const getFirstLinkpathDest = vi.fn((path: string) => path === 'Client'
+            ? { path: 'clients/Client.md' }
+            : null);
+        const app = {
+            vault: {
+                cachedRead: async () => 'Body copy',
+                getName: () => 'Work & notes'
+            },
+            metadataCache: {
+                getFirstLinkpathDest,
+                getFileCache: () => ({
+                    frontmatter: {
+                        client: '[[Client]]',
+                        related: ['[[Client#Overview|Summary]]', '[[Missing note]]'],
+                        details: { reference: 'See [[#Local heading|here]] and [[Client#^block-id]].' },
+                        mixed: [{ reference: '[[Client|<img src=x onerror=alert(1)>]]' }, '[[Client]]']
+                    }
+                })
+            }
+        };
+
+        const content = await generatePreviewContent(file, false, app as never, true);
+        const links = Array.from(content?.querySelectorAll<HTMLAnchorElement>('.obsidian-print-frontmatter-link') ?? []);
+
+        expect(links.map((link) => link.textContent)).toEqual([
+            'Client', 'Summary', 'Missing note', 'here', 'Client#^block-id',
+            '<img src=x onerror=alert(1)>', 'Client'
+        ]);
+        expect(links.map((link) => {
+            const url = new URL(link.href);
+            expect(url.protocol).toBe('obsidian:');
+            expect(url.hostname).toBe('open');
+            expect(url.searchParams.get('vault')).toBe('Work & notes');
+            return url.searchParams.get('file');
+        })).toEqual([
+            'clients/Client.md', 'clients/Client.md#Overview', 'Missing note',
+            'notes/print-demo.md#Local heading', 'clients/Client.md#^block-id',
+            'clients/Client.md', 'clients/Client.md'
+        ]);
+        expect(getFirstLinkpathDest).toHaveBeenCalledWith('Client', file.path);
+        expect(content?.querySelectorAll('.obsidian-print-frontmatter-chip a')).toHaveLength(2);
+        expect(content?.textContent).toContain('See here and Client#^block-id.');
+        expect(content?.textContent).not.toContain('[[');
+        expect(content?.querySelector('img')).toBeNull();
+    });
+
+    it('preserves plain properties and external links when rendering wikilinks', async () => {
+        const file = createFile();
+        const values = ['[plain brackets]', '[[unfinished', '[[]]', '**literal text**', '<b>literal HTML</b>'];
+        const app = {
+            vault: { cachedRead: async () => 'Body copy' },
+            metadataCache: {
+                getFileCache: () => ({
+                    frontmatter: {
+                        values,
+                        website: 'https://example.com/?q=[[literal]]',
+                        email: 'mailto:hello@example.com'
+                    }
+                })
+            }
+        };
+
+        const content = await generatePreviewContent(file, false, app as never, true);
+
+        expect(Array.from(content?.querySelectorAll('.obsidian-print-frontmatter-chip') ?? [])
+            .map((chip) => chip.textContent)).toEqual(values);
+        expect(Array.from(content?.querySelectorAll('.obsidian-print-frontmatter-link') ?? [])
+            .map((link) => link.getAttribute('href'))).toEqual([
+            'https://example.com/?q=[[literal]]', 'mailto:hello@example.com'
+        ]);
+        expect(content?.querySelector('b, strong')).toBeNull();
     });
 
     it('marks rendered content without using live preview pane classes', async () => {
